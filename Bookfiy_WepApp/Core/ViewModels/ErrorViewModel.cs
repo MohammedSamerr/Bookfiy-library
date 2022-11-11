@@ -1,4 +1,4 @@
-namespace Bookfiy_WepApp.Models
+namespace Bookfiy_WepApp.Core.ViewModels
 {
     public class ErrorViewModel
     {
