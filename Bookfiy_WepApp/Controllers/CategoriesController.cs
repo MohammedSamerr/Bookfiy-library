@@ -38,6 +38,8 @@ namespace Bookfiy_WepApp.Controllers
             };
             _context.Categories.Add(category);
             _context.SaveChanges();
+
+            TempData["Message"] = "Saved successfully";
             return RedirectToAction(nameof(Index));
         }
 
@@ -74,6 +76,8 @@ namespace Bookfiy_WepApp.Controllers
             category.LastUpdateOn = DateTime.Now;
 
             _context.SaveChanges();
+            TempData["Message"] = "Saved successfully";
+
 
             return RedirectToAction(nameof(Index));
         }
