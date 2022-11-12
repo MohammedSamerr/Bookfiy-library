@@ -24,6 +24,9 @@ body {
     right: 0;
     padding: 0.5rem 0.75rem;
     z-index: 1;
+    background-color: transparent;
+    border: 0;
+    -webkit-appearance: none;
 }
 /* end override bootbox*/
 

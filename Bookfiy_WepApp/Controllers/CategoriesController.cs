@@ -1,6 +1,7 @@
 ﻿using Bookfiy_WepApp.Core.Models;
 
 using Bookfiy_WepApp.Data;
+using Bookfiy_WepApp.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,10 +20,12 @@ namespace Bookfiy_WepApp.Controllers
             return View(_context.Categories.AsNoTracking().ToList());
         }
 
+        [HttpGet]
+        [Ajax_]
         public IActionResult Create()
         {
 
-            return View("Form");
+            return PartialView("_Form");
         }
 
         [HttpPost]
@@ -30,7 +33,7 @@ namespace Bookfiy_WepApp.Controllers
         public IActionResult Create(CategoryFormViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
+                return BadRequest();
 
             var category = new Category
             {
@@ -39,11 +42,12 @@ namespace Bookfiy_WepApp.Controllers
             _context.Categories.Add(category);
             _context.SaveChanges();
 
-            TempData["Message"] = "Saved successfully";
-            return RedirectToAction(nameof(Index));
+            
+            return PartialView("_CategoryRow" , category);
         }
 
         [HttpGet]
+        [Ajax_]
         public IActionResult Edit(int id)
         {
             var category = _context.Categories.Find(id);
@@ -57,7 +61,7 @@ namespace Bookfiy_WepApp.Controllers
                 Name = category.Name
             };
 
-            return View("Form", viewModel);
+            return PartialView("_Form", viewModel);
         }
 
         [HttpPost]
@@ -65,7 +69,7 @@ namespace Bookfiy_WepApp.Controllers
         public IActionResult Edit(CategoryFormViewModel model)
         {
             if (!ModelState.IsValid)
-                return View("Form", model);
+                return BadRequest();
 
             var category = _context.Categories.Find(model.Id);
 
@@ -76,10 +80,10 @@ namespace Bookfiy_WepApp.Controllers
             category.LastUpdateOn = DateTime.Now;
 
             _context.SaveChanges();
-            TempData["Message"] = "Saved successfully";
 
 
-            return RedirectToAction(nameof(Index));
+
+            return PartialView("_CategoryRow", category);
         }
         [HttpPost]
        

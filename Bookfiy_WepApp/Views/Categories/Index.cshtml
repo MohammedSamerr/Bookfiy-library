@@ -15,7 +15,7 @@
             Categories
         </h3>
         <div class="card-toolbar">
-            <a asp-controller="Categories" asp-action="Create" class="btn btn-sm btn-primary float-lg-end">
+            <a href="javascript:;" class="btn btn-sm btn-primary float-lg-end js-render-modal" data-title="Add Category" data-url="/Categories/Create">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z" />
                 </svg>
@@ -42,56 +42,25 @@
         }
         else
         {
-            <table class="table table-hover table-rounded table-striped border gy-7 gs-7">
-                <thead>
-                    <tr class="fw-bold fs-6 text-gray-800 border-bottom-2 border-gray-200">
-                        <th>Name</th>
-                        <th>Status</th>
-                        <th>Created On</th>
-                        <th>Last Updated on</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.Name</td>
-                            <td>
-                                <span class="badge badge-light-@(item.IsDelete ?"danger" : "success" ) js-status">
-                                    @(item.IsDelete ? "Deleted" : "Available")
-                                </span>
-                            </td>
-                            <td>@item.CreatedOn</td>
-                            <td class="js-updated-on">@item.LastUpdateOn</td>
-                            <td>
-                               
-                                <div class="dropdown">
-                                    <buatton class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-                                            <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
-                                        </svg>
-                                    </buatton>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" asp-controller="Categories" asp-action="Edit" asp-route-id="@item.Id">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
-                                                </svg>
-                                            Edit</a></li>
-                                        <li><a class="dropdown-item js-toggle-status" href="javascript:;" data-id="@item.Id" >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-toggles" viewBox="0 0 16 16">
-                                                    <path d="M4.5 9a3.5 3.5 0 1 0 0 7h7a3.5 3.5 0 1 0 0-7h-7zm7 6a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm-7-14a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm2.45 0A3.49 3.49 0 0 1 8 3.5 3.49 3.49 0 0 1 6.95 6h4.55a2.5 2.5 0 0 0 0-5H6.95zM4.5 0h7a3.5 3.5 0 1 1 0 7h-7a3.5 3.5 0 1 1 0-7z" />
-                                                </svg>
-                                            Toggle Status </a></li>
-                                      
-                                    </ul>
-                                </div>
-                            </td>
+           <div class="table-responsive">
+                <table class="table table-row-dashed table-row-gray-300 gy-7">
+                    <thead>
+                        <tr class="fw-bold fs-6 text-gray-800">
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Created On</th>
+                            <th>Last Updated On</th>
+                            <th>Action</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <partial name="_CategoryRow" model="@item" />
+                        }
+                    </tbody>
+                </table>
+            </div>
         }
     </div>
 </div>
@@ -99,10 +68,10 @@
 <input type="hidden" name="__RequestVerificationToken" value="@antiforgery.GetAndStoreTokens(Context).RequestToken" />
 
 @section Scripts{
-
+      <partial name="_ValidationScriptsPartial" />
     <script>
         $(document).ready(function(){
-            $('.js-toggle-status').on('click',function(){
+            $('body').delegate('.js-toggle-status', 'click',function(){
 
                 var btn = $(this) ;
 
