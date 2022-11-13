@@ -1,4 +1,7 @@
-﻿var updatedRow;
+﻿var table;
+var datatable;
+var updatedRow;
+var exportedColumns = [];
 
 function showMassegeSuccessfully(massage = 'Saved successfully!') {
     Swal.fire({
@@ -24,30 +27,134 @@ function showMassegeErorr(massage = 'Something went wrong!') {
     });
 }
 
-function onMassegesuccess(item) {
+function onMassegesuccess(row) {
     showMassegeSuccessfully();
     $('#Modal').modal('hide');
-    if (updatedRow === undefined) {
-        $('tbody').append(item);
-    }
-    else {
-        $(updatedRow).replaceWith(item);
+
+    if (updatedRow !== undefined) {
+        datatable.row(updatedRow).remove().draw();
         updatedRow = undefined;
     }
-    KT.init();
-    KT.initHanders();
+
+    var newRow = $(row);
+    datatable.row.add(newRow).draw();
+
+    KTMenu.init();
+    KTMenu.initHandlers();
 }
 
-$(document).ready(function () {
+//handle datatable
+var headers = $('th');
+$.each(headers, function (i) {
+    if (!$(this).hasClass('js-no-export'))
+        exportedColumns.push(i);
+});
 
+// Class definition
+var KTDatatables = function () {
+    // Shared variables
+
+
+    // Private functions
+    var initDatatable = function () {
+
+        // Init datatable --- more info on datatables: https://datatables.net/manual/
+        datatable = $(table).DataTable({
+            "info": false,
+            'order': [],
+            'pageLength': 10,
+        });
+    }
+
+    // Hook export buttons
+    var exportButtons = () => {
+        const documentTitle = $('.js-datatable').data('document-title');
+        var buttons = new $.fn.dataTable.Buttons(table, {
+            buttons: [
+                {
+                    extend: 'copyHtml5',
+                    title: documentTitle,
+                    exportOptions: {
+                        columns: exportedColumns
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    title: documentTitle,
+                    exportOptions: {
+                        columns: exportedColumns
+                    }
+                },
+                {
+                    extend: 'csvHtml5',
+                    title: documentTitle,
+                    exportOptions: {
+                        columns: exportedColumns
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    title: documentTitle,
+                    exportOptions: {
+                        columns: exportedColumns
+                    }
+                }
+            ]
+        }).container().appendTo($('#kt_datatable_example_buttons'));
+
+        // Hook dropdown menu click event to datatable export buttons
+        const exportButtons = document.querySelectorAll('#kt_datatable_example_export_menu [data-kt-export]');
+        exportButtons.forEach(exportButton => {
+            exportButton.addEventListener('click', e => {
+                e.preventDefault();
+
+                // Get clicked export value
+                const exportValue = e.target.getAttribute('data-kt-export');
+                const target = document.querySelector('.dt-buttons .buttons-' + exportValue);
+
+                // Trigger click event on hidden datatable export buttons
+                target.click();
+            });
+        });
+    }
+
+    // Search Datatable --- official docs reference: https://datatables.net/reference/api/search()
+    var handleSearchDatatable = () => {
+        const filterSearch = document.querySelector('[data-kt-filter="search"]');
+        filterSearch.addEventListener('keyup', function (e) {
+            datatable.search(e.target.value).draw();
+        });
+    }
+
+    // Public methods
+    return {
+        init: function () {
+            table = document.querySelector('.js-datatable');
+
+            if (!table) {
+                return;
+            }
+
+            initDatatable();
+            exportButtons();
+            handleSearchDatatable();
+        }
+    };
+}();
+
+$(document).ready(function () {
+    //sweet alerts
     var massage = $('#Message').text();
     if (massage !== '') {
         showMassegeSuccessfully(massage);
     }
-
+    //handel datatable
+    KTUtil.onDOMContentLoaded(function () {
+        KTDatatables.init();
+    });
     //handle bootstarp modal
 
-    $('body').delegate('.js-render-modal','click', function () {
+    $('body').delegate('.js-render-modal', 'click', function () {
 
         var btn = $(this);
 
