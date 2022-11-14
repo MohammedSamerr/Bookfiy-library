@@ -10,6 +10,10 @@ namespace Bookfiy_WepApp.Core.Mapping
             //category
             CreateMap<Category , CategoryViewModel>();
             CreateMap<CategoryFormViewModel , Category>().ReverseMap();
+
+            //Author
+            CreateMap<Author, AuthorViewModel>();
+            CreateMap<AuthorFormViewModel, Author>().ReverseMap();
         }
     }
 }

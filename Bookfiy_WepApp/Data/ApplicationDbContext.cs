@@ -12,5 +12,6 @@ namespace Bookfiy_WepApp.Data
         }
 
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Author> Authors { get; set; }
     }
 }
