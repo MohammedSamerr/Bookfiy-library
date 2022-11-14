@@ -14,5 +14,7 @@ namespace Bookfiy_WepApp.Core.Models
 
         public DateTime CreatedOn { get; set; } = DateTime.Now;
         public DateTime? LastUpdateOn { get; set; }
+
+        public ICollection<Books_Categories> Books { get; set; } = new List<Books_Categories>();
     }
 }
