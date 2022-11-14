@@ -1,4 +1,6 @@
-﻿using Bookfiy_WepApp.Core.Models;
+﻿using AutoMapper;
+using Bookfiy_WepApp.Core.Mapping;
+using Bookfiy_WepApp.Core.Models;
 
 using Bookfiy_WepApp.Data;
 using Bookfiy_WepApp.Filters;
@@ -10,14 +12,18 @@ namespace Bookfiy_WepApp.Controllers
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
-        public CategoriesController(ApplicationDbContext context)
+        private readonly IMapper _mapper;
+        public CategoriesController(ApplicationDbContext context , IMapper mapper)
         {
+            _mapper = mapper ;
             _context = context;
         }
 
         public IActionResult Index()
         {
-            return View(_context.Categories.AsNoTracking().ToList());
+            var categories = _context.Categories.AsNoTracking().ToList(); 
+            var voewModel = _mapper.Map<IEnumerable<CategoryViewModel>>(categories);
+            return View(voewModel);
         }
 
         [HttpGet]
@@ -35,15 +41,12 @@ namespace Bookfiy_WepApp.Controllers
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var category = new Category
-            {
-                Name = model.Name,
-            };
+            var category = _mapper.Map<Category>(model);
             _context.Categories.Add(category);
             _context.SaveChanges();
 
-            
-            return PartialView("_CategoryRow" , category);
+            var viewModel = _mapper.Map<CategoryViewModel>(category);
+            return PartialView("_CategoryRow" , viewModel);
         }
 
         [HttpGet]
@@ -55,11 +58,7 @@ namespace Bookfiy_WepApp.Controllers
             if (category is null)
                 return NotFound();
 
-            var viewModel = new CategoryFormViewModel
-            {
-                Id = id,
-                Name = category.Name
-            };
+            var viewModel = _mapper.Map<CategoryFormViewModel>(category);
 
             return PartialView("_Form", viewModel);
         }
@@ -81,9 +80,8 @@ namespace Bookfiy_WepApp.Controllers
 
             _context.SaveChanges();
 
-
-
-            return PartialView("_CategoryRow", category);
+            var viewModel = _mapper.Map<CategoryViewModel>(category);
+            return PartialView("_CategoryRow", viewModel);
         }
         [HttpPost]
        
@@ -98,6 +96,16 @@ namespace Bookfiy_WepApp.Controllers
             category.LastUpdateOn = DateTime.Now;
             _context.SaveChanges();
             return Ok(category.LastUpdateOn.ToString());
+        }
+
+
+        public IActionResult AllowItem(CategoryFormViewModel model)
+        {
+            //select item from database by name
+            //we ensure that data is uniqe so we will use singleordefault
+            var category = _context.Categories.SingleOrDefault(c => c.Name ==model.Name);
+            var isAllowed = category is null || category.Id.Equals(model.Id);
+            return Json(isAllowed);
         }
     }
 }

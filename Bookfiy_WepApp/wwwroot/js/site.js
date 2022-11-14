@@ -27,6 +27,13 @@ function showMassegeErorr(massage = 'Something went wrong!') {
     });
 }
 
+//on model begin
+function onModelBegin() {
+    $('body :submit').attr('disabled', 'disabled').attr('data-kt-indicator','on');
+}
+
+
+
 function onMassegesuccess(row) {
     showMassegeSuccessfully();
     $('#Modal').modal('hide');
@@ -40,8 +47,14 @@ function onMassegesuccess(row) {
     datatable.row.add(newRow).draw();
 
     KTMenu.init();
-    KTMenu.initHandlers();
+    KTMenu.initGlobalHandlers();
 }
+
+// on model complete
+function onModelComplete() {
+    $('body :submit').removeAttr('disabled').removeAttr('data-kt-indicator');
+}
+
 
 //handle datatable
 var headers = $('th');
@@ -61,7 +74,6 @@ var KTDatatables = function () {
         // Init datatable --- more info on datatables: https://datatables.net/manual/
         datatable = $(table).DataTable({
             "info": false,
-            'order': [],
             'pageLength': 10,
         });
     }
@@ -187,6 +199,54 @@ $(document).ready(function () {
         modal.modal('show');
 
     });
+
+    //handle toggle status
+
+    $('body').delegate('.js-toggle-status', 'click', function () {
+
+        var btn = $(this);
+
+        bootbox.confirm({
+            message: "Are you sure that you want to change this category status?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-danger'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-secondary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    $.post({
+                        url: btn.data('url'),
+                        data: {
+                            '__RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (lastUpdatedOn) {
+                            var row = btn.parents('tr');
+                            var status = row.find('.js-status');
+                            var newstatus = status.text().trim() === 'Deleted' ? 'Available' : 'Deleted';
+                            status.text(newstatus).toggleClass('badge-light-danger badge-light-success');
+
+
+                            row.find('.js-updated-on').html(lastUpdatedOn);
+                            row.addClass('animate__animated animate__flash')
+
+                            showMassegeSuccessfully();
+                        },
+                        error: function () {
+                            showMassegeErorr();
+                        }
+                    });
+
+                }
+            }
+        });
+    });
+
 
 
 });

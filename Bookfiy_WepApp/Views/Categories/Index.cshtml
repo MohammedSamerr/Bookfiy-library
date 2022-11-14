@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Category>
+﻿@model IEnumerable<CategoryViewModel>
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery ;
 @{
     ViewData["Title"] = "Categories";
@@ -132,67 +132,5 @@
 
     @section Scripts{
     <partial name="_ValidationScriptsPartial" />
-    <script>
-
-        
-
-
-
-
-        $(document).ready(function () {
-
-            
-
-            $('body').delegate('.js-toggle-status', 'click', function () {
-
-                var btn = $(this);
-
-                bootbox.confirm({
-                    message: "Are you sure that you want to change this category status?",
-                    buttons: {
-                        confirm: {
-                            label: 'Yes',
-                            className: 'btn-danger'
-                        },
-                        cancel: {
-                            label: 'No',
-                            className: 'btn-secondary'
-                        }
-                    },
-                    callback: function (result) {
-                        if (result) {
-                            $.post({
-                                url: '/Categories/ToggleStatus/' + btn.data('id'),
-                                data: {
-                                    '__RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                                },
-                                success: function (lastUpdatedOn) {
-                                    var row = btn.parents('tr');
-                                    var status = row.find('.js-status');
-                                    var newstatus = status.text().trim() === 'Deleted' ? 'Available' : 'Deleted';
-                                    status.text(newstatus).toggleClass('badge-light-danger badge-light-success');
-
-
-                                    row.find('.js-updated-on').html(lastUpdatedOn);
-                                    row.addClass('animate__animated animate__flash')
-
-                                    showMassegeSuccessfully();
-                                },
-                                error: function () {
-                                    showMassegeErorr();
-                                }
-                            });
-
-                        }
-                    }
-                });
-
-
-
-
-
-            });
-
-        });
-    </script>
+ 
 }

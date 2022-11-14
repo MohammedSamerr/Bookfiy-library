@@ -1,5 +1,8 @@
-﻿namespace Bookfiy_WepApp.Core.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Bookfiy_WepApp.Core.Models
 {
+    [Index(nameof(Name) , IsUnique = true)]
     public class Category
     {
         public int Id { get; set; }
