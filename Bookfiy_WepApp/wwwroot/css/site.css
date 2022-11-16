@@ -30,3 +30,8 @@ body {
 }
 /* end override bootbox*/
 
+.form-floating > .form-select {
+    padding-top: 2.15rem;
+    padding-bottom: .225rem;
+}
+
