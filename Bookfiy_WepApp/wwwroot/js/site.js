@@ -156,7 +156,17 @@ var KTDatatables = function () {
 
 $(document).ready(function () {
     //select2
+    //$('.js-select2').select2();
     $('.js-select2').select2();
+    //$('.js-select2').on('select2:select', function (e) {
+    //    var select = $(this);
+    //    $('form').validate().element('#' + select.attr('id'));
+    //});
+    $('.js-select2').on('select2:select', function (e) {
+        var select = $(this);
+        $('form').validate().element('#' + select.attr('id'));
+    });
+
     //datepicker
     $('.js-datepicker').daterangepicker({
         singleDatePicker: true,

@@ -28,7 +28,7 @@ namespace Bookfiy_WepApp.Controllers
 
         [HttpGet]
         [Ajax_]
-        public IActionResult Create()
+        public  IActionResult Create()
         {
 
             return PartialView("_Form");

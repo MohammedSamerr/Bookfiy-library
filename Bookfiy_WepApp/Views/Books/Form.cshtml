@@ -31,10 +31,10 @@
                 <input type="hidden" asp-for="Id" />
             }
             <!--begin::Image input-->
-            <div class="image-input image-input-outline mb-10" data-kt-image-input="true" style="background-image: url(/images/@(string.IsNullOrEmpty(Model.ImageURL) ? "no-book.jpg" : $"/Books/{Model.ImageURL}"))">
+            <div class="image-input image-input-outline mb-10" data-kt-image-input="true" style="background-image: url(@(string.IsNullOrEmpty(Model.ImageURL) ? "/images/no-book.jpg" :Model.ImageURL))">
                 
                 <!--begin::Image preview wrapper-->
-                <div class="image-input-wrapper w-125px h-200px" style="background-image: url(/images/@(string.IsNullOrEmpty(Model.ImageURL) ? "no-book.jpg" : $"/Books/{Model.ImageURL}"))"></div>
+                <div class="image-input-wrapper w-125px h-200px" style="background-image: url(@(string.IsNullOrEmpty(Model.ImageURL) ? "/images/no-book.jpg" :Model.ImageURL))"></div>
                 <!--end::Image preview wrapper-->
                 <!--begin::Edit button-->
                 <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow"

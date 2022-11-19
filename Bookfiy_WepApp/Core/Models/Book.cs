@@ -24,6 +24,9 @@ namespace Bookfiy_WepApp.Core.Models
         public DateTime PublishingDate { get; set; }
 
         public string? ImageURL { get; set; }
+        public string? ImageThumnailURL { get; set; }
+        public string? ImagePublicId { get; set; }
+
 
         [MaxLength(50)]
         public string Hall { get; set; } = null!;

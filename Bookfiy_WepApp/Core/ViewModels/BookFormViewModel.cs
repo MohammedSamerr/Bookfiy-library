@@ -10,27 +10,27 @@ namespace Bookfiy_WepApp.Core.ViewModels
     {
         public int Id { get; set; }
 
-        [MaxLength(500, ErrorMessage = Error.MaxLength)]
-        [Remote("AllowItem", null, AdditionalFields = "Id,AuthorId", ErrorMessage = Error.Dublicated)]
+        [MaxLength(500, ErrorMessage = ErrorValidation.MaxLength)]
+        [Remote("AllowItem", null!, AdditionalFields = "Id,AuthorId", ErrorMessage = ErrorValidation.Dublicated)]
         public string Title { get; set; } = null!;
 
-        [Display(Name ="Author")]
-        [Remote("AllowItem", null, AdditionalFields = "Id,Title", ErrorMessage = Error.Dublicated)]
+        [Display(Name = "Author")]
+        [Remote("AllowItem", null!, AdditionalFields = "Id,Title", ErrorMessage = ErrorValidation.Dublicated)]
         public int AuthorId { get; set; }
         //dropdown list of Authors
         public IEnumerable<SelectListItem>? Author { get; set; }
 
-        [MaxLength(200, ErrorMessage = Error.MaxLength)]
+        [MaxLength(200, ErrorMessage = ErrorValidation.MaxLength)]
         public string Publisher { get; set; } = null!;
 
         [Display(Name = "Publishing Date")]
-        [AssertThat("PublishingDate <= Today()" ,ErrorMessage = Error.date)]
+        [AssertThat("PublishingDate <= Today()" ,ErrorMessage = ErrorValidation.date)]
         public DateTime PublishingDate { get; set; } = DateTime.Now;
 
         public IFormFile? Image { get; set; }
         public string? ImageURL { get; set; }
 
-        [MaxLength(50, ErrorMessage = Error.MaxLength)]
+        [MaxLength(50, ErrorMessage = ErrorValidation.MaxLength)]
         public string Hall { get; set; } = null!;
         [Display(Name = "Is availabble for rent")]
         public bool IsAvailabbleForRent { get; set; }
