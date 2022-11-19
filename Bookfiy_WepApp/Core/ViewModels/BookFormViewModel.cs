@@ -14,7 +14,7 @@ namespace Bookfiy_WepApp.Core.ViewModels
         [Remote("AllowItem", null!, AdditionalFields = "Id,AuthorId", ErrorMessage = ErrorValidation.Dublicated)]
         public string Title { get; set; } = null!;
 
-        [Display(Name = "Author")]
+        [Display(Name = "Author") ]
         [Remote("AllowItem", null!, AdditionalFields = "Id,Title", ErrorMessage = ErrorValidation.Dublicated)]
         public int AuthorId { get; set; }
         //dropdown list of Authors

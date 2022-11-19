@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Bookfiy_WepApp.Core.Const;
 using Bookfiy_WepApp.Core.Models;
+using Bookfiy_WepApp.Core.ViewModels;
 using Bookfiy_WepApp.Data;
 using Bookfiy_WepApp.settings;
 using CloudinaryDotNet;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace Bookfiy_WepApp.Controllers
 {
@@ -40,7 +42,18 @@ namespace Bookfiy_WepApp.Controllers
 
             return View();
         }
+        public IActionResult Details(int id)
+        {
+            var book = _context.Books.Include(a => a.Author)
+                 .Include(c => c.Categories)
+                 .ThenInclude(c => c.Category)
+                 .SingleOrDefault(b => b.Id == id);
+            if (book is null)
+                return NotFound();
 
+            var viewModel = _mapper.Map<BookViewModel>(book);
+            return View(viewModel);
+        }
         public IActionResult Create()
         {
             var viewModel = PopulateViewModel();
@@ -108,7 +121,7 @@ namespace Bookfiy_WepApp.Controllers
             _context.SaveChanges();
 
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Details), new { id = book.Id });
         }
 
         public IActionResult Edit(int id)
@@ -214,7 +227,7 @@ namespace Bookfiy_WepApp.Controllers
             _context.SaveChanges();
 
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Details), new { id = book.Id });
         }
         public IActionResult AllowItem(BookFormViewModel model)
         {

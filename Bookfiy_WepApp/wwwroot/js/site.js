@@ -26,10 +26,12 @@ function showMassegeErorr(massage = 'Something went wrong!') {
 
     });
 }
-
+function disableSunbmitbutton() {
+    $('body :submit').attr('disabled', 'disabled').attr('data-kt-indicator', 'on');
+}
 //on model begin
 function onModelBegin() {
-    $('body :submit').attr('disabled', 'disabled').attr('data-kt-indicator','on');
+    disableSunbmitbutton();
 }
 
 
@@ -155,6 +157,11 @@ var KTDatatables = function () {
 }();
 
 $(document).ready(function () {
+    //disable submit button
+    $('form').on('submit', function () {
+        var isValid = $(this).valid();
+        if (isValid) disableSunbmitbutton();
+    });
     //select2
     //$('.js-select2').select2();
     $('.js-select2').select2();
