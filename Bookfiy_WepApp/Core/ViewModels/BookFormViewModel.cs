@@ -27,8 +27,9 @@ namespace Bookfiy_WepApp.Core.ViewModels
         [AssertThat("PublishingDate <= Today()" ,ErrorMessage = ErrorValidation.date)]
         public DateTime PublishingDate { get; set; } = DateTime.Now;
 
-        public IFormFile? Image { get; set; }
+        public IFormFile? Images { get; set; }
         public string? ImageURL { get; set; }
+        public string? ImageThumbnailUrl { get; set; }
 
         [MaxLength(50, ErrorMessage = ErrorValidation.MaxLength)]
         public string Hall { get; set; } = null!;

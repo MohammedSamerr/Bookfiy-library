@@ -15,10 +15,10 @@
             }
             <div class="mb-10">
                 <!--begin::Image input-->
-                <div class="image-input image-input-outline " data-kt-image-input="true" style="background-image: url(@(string.IsNullOrEmpty(Model.ImageURL) ? "/images/no-book.jpg" :Model.ImageURL))">
+                <div class="image-input image-input-outline " data-kt-image-input="true" style="background-image: url(@(string.IsNullOrEmpty(Model.ImageURL) ? "/images/Books/no-book.jpg" :Model.ImageURL))">
 
                     <!--begin::Image preview wrapper-->
-                    <div class="image-input-wrapper w-125px h-200px" style="background-image: url(@(string.IsNullOrEmpty(Model.ImageURL) ? "/images/no-book.jpg" :Model.ImageURL))"></div>
+                    <div class="image-input-wrapper w-125px h-200px" style="background-image: url(@(string.IsNullOrEmpty(Model.ImageURL) ? "/images/Books/no-book.jpg" :Model.ImageURL))"></div>
                     <!--end::Image preview wrapper-->
                     <!--begin::Edit button-->
                     <label class="btn btn-icon btn-circle btn-color-muted btn-active-color-primary w-25px h-25px bg-body shadow"
@@ -27,7 +27,7 @@
                         <i class="bi bi-pencil-fill fs-7"></i>
 
                         <!--begin::Inputs-->
-                        <input type="file" asp-for="Image" accept=".png, .jpg, .jpeg" />
+                        <input type="file" asp-for="Images" accept=".png, .jpg, .jpeg" />
                         <input type="hidden" name="avatar_remove" />
                         <!--end::Inputs-->
                     </label>
@@ -50,7 +50,7 @@
                 <div class="form-text">
                     Allowed file types: png, jpg, jpeg and cannot be more than 2 MB
                 </div>
-                <span asp-validation-for="Image" class="text-danger"></span>
+                <span asp-validation-for="Images" class="text-danger"></span>
                 <!--end::Image input-->
             </div>
 

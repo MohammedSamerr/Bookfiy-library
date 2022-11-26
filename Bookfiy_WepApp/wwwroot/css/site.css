@@ -35,3 +35,6 @@ body {
     padding-bottom: .225rem;
 }
 
+.dt-spinner + div{
+    display :none !important ;
+}

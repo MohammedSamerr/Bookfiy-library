@@ -9,41 +9,35 @@
     </td>
     <td>@Model.CreatedOn</td>
     <td class="js-updated-on">@Model.LastUpdateOn</td>
-    <td>
-
-        <div class="dropdown">
-            <buatton class="btn btn-sm btn-icon btn-color-primary btn-active-light-primary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <span class="svg-icon svg-icon-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24">
-                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                            <rect x="5" y="5" width="5" height="5" rx="1" fill="currentColor"></rect>
-                            <rect x="14" y="5" width="5" height="5" rx="1" fill="currentColor" opacity="0.3"></rect>
-                            <rect x="5" y="14" width="5" height="5" rx="1" fill="currentColor" opacity="0.3"></rect>
-                            <rect x="14" y="14" width="5" height="5" rx="1" fill="currentColor" opacity="0.3"></rect>
-                        </g>
-                    </svg>
-                </span>
-            </buatton>
-            <ul class="dropdown-menu">
-                <li>
-                    <a class="dropdown-item js-render-modal" href="javascript:;" data-update="true" data-title="Edit Category" data-url="/Categories/Edit/@Model.Id">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
-                        </svg>
-                        Edit
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item js-toggle-status" href="javascript:;" data-url="/Categories/ToggleStatus/@Model.Id">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-toggles" viewBox="0 0 16 16">
-                            <path d="M4.5 9a3.5 3.5 0 1 0 0 7h7a3.5 3.5 0 1 0 0-7h-7zm7 6a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm-7-14a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm2.45 0A3.49 3.49 0 0 1 8 3.5 3.49 3.49 0 0 1 6.95 6h4.55a2.5 2.5 0 0 0 0-5H6.95zM4.5 0h7a3.5 3.5 0 1 1 0 7h-7a3.5 3.5 0 1 1 0-7z" />
-                        </svg>
-                        Toggle Status
-                    </a>
-                </li>
-
-            </ul>
+    <td class="text-end">
+        <a href="#" class="btn btn-light btn-active-light-primary btn-sm" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
+            Actions
+            <!--begin::Svg Icon | path: icons/duotune/arrows/arr072.svg-->
+            <span class="svg-icon svg-icon-5 m-0">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.4343 12.7344L7.25 8.55005C6.83579 8.13583 6.16421 8.13584 5.75 8.55005C5.33579 8.96426 5.33579 9.63583 5.75 10.05L11.2929 15.5929C11.6834 15.9835 12.3166 15.9835 12.7071 15.5929L18.25 10.05C18.6642 9.63584 18.6642 8.96426 18.25 8.55005C17.8358 8.13584 17.1642 8.13584 16.75 8.55005L12.5657 12.7344C12.2533 13.0468 11.7467 13.0468 11.4343 12.7344Z" fill="currentColor"></path>
+                </svg>
+            </span>
+            <!--end::Svg Icon-->
+        </a>
+        <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold w-200px py-3" data-kt-menu="true" style="">
+            <!--begin::Menu item-->
+            <div class="menu-item px-3">
+                <a href="javascript:;" class="menu-link px-3 js-render-modal"
+                   data-title="Edit Category" data-url="/Categories/Edit/@Model.Id"
+                   data-update="true">
+                    Edit
+                </a>
+            </div>
+            <!--end::Menu item-->
+            <!--begin::Menu item-->
+            <div class="menu-item px-3">
+                <a href="javascript:;" class="menu-link flex-stack px-3 js-toggle-status"
+                   data-url="/Categories/ToggleStatus/@Model.Id">
+                    Toggle Status
+                </a>
+            </div>
+            <!--end::Menu item-->
         </div>
     </td>
 </tr>
