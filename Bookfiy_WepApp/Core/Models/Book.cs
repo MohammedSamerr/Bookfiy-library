@@ -36,5 +36,8 @@ namespace Bookfiy_WepApp.Core.Models
         public string Description { get; set; } = null!;
 
         public ICollection<Books_Categories> Categories { get; set; } = new List<Books_Categories>();
+        public ICollection<BookCopy> Copies { get; set; } = new List<BookCopy>();
+
+        
     }
 }

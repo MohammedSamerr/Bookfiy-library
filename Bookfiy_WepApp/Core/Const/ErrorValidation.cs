@@ -8,5 +8,6 @@
         public const string NotAllowedExtensions = "Only .png , .jpg , .jpeg is allowed!";
         public const string maxSize = "File cannot be more than 2 MB";
         public const string date = "Date cannot be in the future!";
+        public const string InvalidRange = "{0} Should be between {0} and {1}";
     }
 }

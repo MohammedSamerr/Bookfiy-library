@@ -8,7 +8,7 @@ namespace Bookfiy_WepApp.Core.ViewModels
         public string Title { get; set; } = null!;
         public bool IsDelete { get; set; }
 
-        public DateTime CreatedOn { get; set; } = DateTime.Now;
+        public DateTime CreatedOn { get; set; }
 
         public string? Author { get; set; }
 
@@ -23,5 +23,6 @@ namespace Bookfiy_WepApp.Core.ViewModels
         public string Description { get; set; } = null!;
 
         public IEnumerable<string> Categories { get; set; } = null!;
+        public IEnumerable<BookCopyViewModel> Copies { get; set; } = null!;
     }
 }

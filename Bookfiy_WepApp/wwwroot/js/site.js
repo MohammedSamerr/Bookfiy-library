@@ -49,7 +49,7 @@ function onMassegesuccess(row) {
     datatable.row.add(newRow).draw();
 
     KTMenu.init();
-    KTMenu.initGlobalHandlers();
+    KTMenu.createInstances();
 }
 
 // on model complete

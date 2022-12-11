@@ -83,9 +83,8 @@ namespace Bookfiy_WepApp.Controllers
             var viewModel = _mapper.Map<CategoryViewModel>(category);
             return PartialView("_CategoryRow", viewModel);
         }
-        [HttpPost]
-       
 
+        [HttpPost]
         public IActionResult ToggleStatus(int id)
         {
             var category = _context.Categories.Find(id);

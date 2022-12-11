@@ -78,9 +78,11 @@ namespace Bookfiy_WepApp.Controllers
             var jsonData = new { recordsFiltered = recordsTotal, recordsTotal, data= mappedDate };
             return Ok(jsonData);
         }
+
         public IActionResult Details(int id)
         {
             var book = _context.Books.Include(a => a.Author)
+                 .Include(bc => bc.Copies)
                  .Include(c => c.Categories)
                  .ThenInclude(c => c.Category)
                  .SingleOrDefault(b => b.Id == id);
@@ -89,11 +91,6 @@ namespace Bookfiy_WepApp.Controllers
 
             var viewModel = _mapper.Map<BookViewModel>(book);
             return View(viewModel);
-        }
-        public IActionResult Create()
-        {
-            var viewModel = PopulateViewModel();
-            return View("Form", viewModel);
         }
 
         [HttpPost]
@@ -112,6 +109,15 @@ namespace Bookfiy_WepApp.Controllers
 
             return Ok();
         }
+
+
+        public IActionResult Create()
+        {
+            var viewModel = PopulateViewModel();
+            return View("Form", viewModel);
+        }
+
+        
 
         [HttpPost]
         [ValidateAntiForgeryToken]
