@@ -1,6 +1,6 @@
 ﻿namespace Bookfiy_WepApp.Core.Models
 {
-    public class Books_Categories
+    public class Books_Categories 
     {
         public int CategoryId { get; set; }
         public Category? Category { get; set; }

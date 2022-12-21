@@ -1,4 +1,5 @@
 ﻿@model Bookfiy_WepApp.Core.ViewModels.BookCopyViewModel
+
 <tr>
     <td>@Model.SerialNumber</td>
     <td>@Model.EdditionNumber</td>
@@ -28,7 +29,7 @@
             <!--begin::Menu item-->
             <div class="menu-item px-3">
                 <a href="javascript:;" class="menu-link px-3 js-render-modal"
-                   data-title="Edit Model" data-url="/BookCopies/Edit/@Model.Id"
+                   data-title="Edit Copy" data-url="/BookCopies/Edit/@Model.Id"
                    data-update="true">
                     Edit
                 </a>

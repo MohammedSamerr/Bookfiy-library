@@ -4,16 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Bookfiy_WepApp.Core.Models
 {
     [Index(nameof(Title), nameof(AuthorId), IsUnique =true)]
-    public class Book 
+    public class Book : BaseModel
     {
         public int Id { get; set; }
 
         [MaxLength(500)]
         public string Title { get; set; } = null!;
-        public bool IsDelete { get; set; }
-
-        public DateTime CreatedOn { get; set; } = DateTime.Now;
-        public DateTime? LastUpdateOn { get; set; }
 
         public int AuthorId { get; set; }
         public Author? Author { get; set; }

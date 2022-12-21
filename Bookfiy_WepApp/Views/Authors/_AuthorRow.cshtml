@@ -3,7 +3,7 @@
 <tr>
     <td>@Model.Name</td>
     <td>
-        <span class="badge badge-light-@(Model.IsDelete ?"danger" : "success" ) js-status">
+        <span class="badge badge-light-@(Model.IsDelete ? "danger" : "success") js-status">
             @(Model.IsDelete ? "Deleted" : "Available")
         </span>
     </td>

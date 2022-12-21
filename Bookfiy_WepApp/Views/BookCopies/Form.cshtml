@@ -1,35 +1,33 @@
 ﻿@model BoooCopyFormViewModel
 
-
-
-<form method="post" asp-action="@(Model?.Id > 0 ? "Edit" : "Create" )"
+<form asp-action="@(Model?.Id > 0 ? "Edit" : "Create")"
       data-ajax-method="post"
       data-ajax="true"
-      data-ajax-begin="onModelBegin"
-      data-ajax-success="@(Model?.Id > 0 ? "onEditCopySuccess" :"onAddCopySuccess")"
-      data-ajax-failure="showMassegeErorr"
-      data-ajax-complete="onModelComplete">
+      data-ajax-begin="onModalBegin"
+      data-ajax-success="@(Model?.Id > 0 ? "onEditCopySuccess" : "onAddCopySuccess")"
+      data-ajax-failure="showErrorMessage"
+      data-ajax-complete="onModalComplete">
 
-      <input type="hidden" asp-for="BookId" />
+    <input type="hidden" asp-for="BookId" />
     @if (Model?.Id > 0)
     {
         <input type="hidden" asp-for="Id" />
     }
     <div class="mb-5">
         <div class="form-floating mb-2">
-            <input type="text" class="form-control" placeholder="Name" asp-for="EdditionNumber" value="@(Model?.Id > 0 ? @Model.EdditionNumber : string.Empty)" />
+            <input type="text" class="form-control" placeholder="Edition" asp-for="EdditionNumber" value="@(Model?.Id > 0 ? Model.EdditionNumber : string.Empty)" />
             <label asp-for="EdditionNumber"></label>
-            <span asp-validation-for="EdditionNumber" class="text-danger"></span>
         </div>
+        <span asp-validation-for="EdditionNumber" class="text-danger d-block"></span>
     </div>
-    @if(Model!.ShowRentalInput){
-        <div class="col">
-            <div class="form-check form-switch form-check-solid form-check-custom mb-2">
-                <input class="form-check-input" type="checkbox" asp-for="IsAvailabbleForRent">
-                <label class="form-check-label" asp-for="IsAvailabbleForRent"> </label>
-            </div>
+
+    @if (Model!.ShowRentalInput)
+    {
+        <div class="form-check form-switch form-check-solid form-check-custom mb-2">
+            <input class="form-check-input" type="checkbox" asp-for="IsAvailabbleForRent">
+            <label class="form-check-label" asp-for="IsAvailabbleForRent"></label>
         </div>
     }
+
     <partial name="_ModalFooter" />
 </form>
-

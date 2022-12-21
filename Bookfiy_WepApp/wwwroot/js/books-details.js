@@ -1,5 +1,5 @@
 ﻿function onAddCopySuccess(row) {
-    showMassegeSuccessfully();
+    showSuccessMessage();
     $('#Modal').modal('hide');
 
     $('tbody').prepend(row);
@@ -10,11 +10,11 @@
     count.text(newCount);
 
     $('.js-alert').addClass('d-none');
-    $('.table').removeClass('d-none');
+    $('table').removeClass('d-none');
 }
 
 function onEditCopySuccess(row) {
-    showMassegeSuccessfully();
+    showSuccessMessage();
     $('#Modal').modal('hide');
 
     $(updatedRow).replaceWith(row);

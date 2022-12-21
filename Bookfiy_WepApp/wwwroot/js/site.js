@@ -1,43 +1,40 @@
 ﻿var table;
 var datatable;
 var updatedRow;
-var exportedColumns = [];
+var exportedCols = [];
 
-function showMassegeSuccessfully(massage = 'Saved successfully!') {
+function showSuccessMessage(message = 'Saved successfully!') {
     Swal.fire({
         icon: 'success',
-        title: 'success',
-        text: massage,
+        title: 'Good Job',
+        text: message,
         customClass: {
             confirmButton: "btn btn-primary"
         }
-
     });
 }
 
-function showMassegeErorr(massage = 'Something went wrong!') {
+function showErrorMessage(message = 'Something went wrong!') {
     Swal.fire({
         icon: 'error',
         title: 'Oops...',
-        text: massage,
+        text: message.responseText !== undefined ? message.responseText : message,
         customClass: {
             confirmButton: "btn btn-primary"
         }
-
     });
 }
-function disableSunbmitbutton() {
+
+function disableSubmitButton() {
     $('body :submit').attr('disabled', 'disabled').attr('data-kt-indicator', 'on');
 }
-//on model begin
-function onModelBegin() {
-    disableSunbmitbutton();
+
+function onModalBegin() {
+    disableSubmitButton();
 }
 
-
-
-function onMassegesuccess(row) {
-    showMassegeSuccessfully();
+function onModalSuccess(row) {
+    showSuccessMessage();
     $('#Modal').modal('hide');
 
     if (updatedRow !== undefined) {
@@ -47,35 +44,34 @@ function onMassegesuccess(row) {
 
     var newRow = $(row);
     datatable.row.add(newRow).draw();
-
-    KTMenu.init();
-    KTMenu.createInstances();
 }
 
-// on model complete
-function onModelComplete() {
+function onModalComplete() {
     $('body :submit').removeAttr('disabled').removeAttr('data-kt-indicator');
 }
 
+//Select2
+function applySelect2() {
+    $('.js-select2').select2();
+    $('.js-select2').on('select2:select', function (e) {
+        $('form').not('#SignOut').validate().element('#' + $(this).attr('id'));
+    });
+}
 
-//handle datatable
+//DataTables
 var headers = $('th');
 $.each(headers, function (i) {
     if (!$(this).hasClass('js-no-export'))
-        exportedColumns.push(i);
+        exportedCols.push(i);
 });
 
 // Class definition
 var KTDatatables = function () {
-    // Shared variables
-
-
     // Private functions
     var initDatatable = function () {
-
         // Init datatable --- more info on datatables: https://datatables.net/manual/
         datatable = $(table).DataTable({
-            "info": false,
+            'info': false,
             'pageLength': 10,
             'drawCallback': function () {
                 KTMenu.createInstances();
@@ -85,35 +81,35 @@ var KTDatatables = function () {
 
     // Hook export buttons
     var exportButtons = () => {
-        const documentTitle = $('.js-datatable').data('document-title');
+        const documentTitle = $('.js-datatables').data('document-title');
         var buttons = new $.fn.dataTable.Buttons(table, {
             buttons: [
                 {
                     extend: 'copyHtml5',
                     title: documentTitle,
                     exportOptions: {
-                        columns: exportedColumns
+                        columns: exportedCols
                     }
                 },
                 {
                     extend: 'excelHtml5',
                     title: documentTitle,
                     exportOptions: {
-                        columns: exportedColumns
+                        columns: exportedCols
                     }
                 },
                 {
                     extend: 'csvHtml5',
                     title: documentTitle,
                     exportOptions: {
-                        columns: exportedColumns
+                        columns: exportedCols
                     }
                 },
                 {
                     extend: 'pdfHtml5',
                     title: documentTitle,
                     exportOptions: {
-                        columns: exportedColumns
+                        columns: exportedCols
                     }
                 }
             ]
@@ -146,7 +142,7 @@ var KTDatatables = function () {
     // Public methods
     return {
         init: function () {
-            table = document.querySelector('.js-datatable');
+            table = document.querySelector('.js-datatables');
 
             if (!table) {
                 return;
@@ -160,85 +156,87 @@ var KTDatatables = function () {
 }();
 
 $(document).ready(function () {
-    //disable submit button
-    $('form').on('submit', function () {
+    //Disable submit button
+    $('form').not('#SignOut').on('submit', function () {
+        if ($('.js-tinymce').length > 0) {
+            $('.js-tinymce').each(function () {
+                var input = $(this);
+
+                var content = tinyMCE.get(input.attr('id')).getContent();
+                input.val(content);
+            });
+        }
+
         var isValid = $(this).valid();
-        if (isValid) disableSunbmitbutton();
-    });
-    //select2
-    //$('.js-select2').select2();
-    $('.js-select2').select2();
-    //$('.js-select2').on('select2:select', function (e) {
-    //    var select = $(this);
-    //    $('form').validate().element('#' + select.attr('id'));
-    //});
-    $('.js-select2').on('select2:select', function (e) {
-        var select = $(this);
-        $('form').validate().element('#' + select.attr('id'));
+        if (isValid) disableSubmitButton();
     });
 
-    //datepicker
+    //TinyMCE
+    if ($('.js-tinymce').length > 0) {
+        var options = { selector: ".js-tinymce", height: "430" };
+
+        if (KTThemeMode.getMode() === "dark") {
+            options["skin"] = "oxide-dark";
+            options["content_css"] = "dark";
+        }
+
+        tinymce.init(options);
+    }
+
+    //Select2
+    applySelect2();
+
+    //Datepicker
     $('.js-datepicker').daterangepicker({
         singleDatePicker: true,
-        showDropdowns: true,
-        minYear : 1901,
-        maxDate : new Date(),
         autoApply: true,
-        drops : 'up'
+        drops: 'up',
+        maxDate: new Date()
     });
-    //sweet alerts
-    var massage = $('#Message').text();
-    if (massage !== '') {
-        showMassegeSuccessfully(massage);
+
+    //SweetAlert
+    var message = $('#Message').text();
+    if (message !== '') {
+        showSuccessMessage(message);
     }
-    //handel datatable
+
+    //DataTables
     KTUtil.onDOMContentLoaded(function () {
         KTDatatables.init();
     });
-    //handle bootstarp modal
 
+    //Handle bootstrap modal
     $('body').delegate('.js-render-modal', 'click', function () {
-
         var btn = $(this);
-
         var modal = $('#Modal');
-
-        //render title
 
         modal.find('#ModalLabel').text(btn.data('title'));
 
         if (btn.data('update') !== undefined) {
-
             updatedRow = btn.parents('tr');
         }
 
         $.get({
             url: btn.data('url'),
             success: function (form) {
-
                 modal.find('.modal-body').html(form);
-                //apply validation to ajax form
                 $.validator.unobtrusive.parse(modal);
-
+                applySelect2();
             },
             error: function () {
-                showMassegeErorr();
+                showErrorMessage();
             }
-
         });
 
         modal.modal('show');
-
     });
 
-    //handle toggle status
-
+    //Handle Toggle Status
     $('body').delegate('.js-toggle-status', 'click', function () {
-
         var btn = $(this);
 
         bootbox.confirm({
-            message: "Are you sure that you want to change this category status?",
+            message: "Are you sure that you need to toggle this item status?",
             buttons: {
                 confirm: {
                     label: 'Yes',
@@ -259,25 +257,24 @@ $(document).ready(function () {
                         success: function (lastUpdatedOn) {
                             var row = btn.parents('tr');
                             var status = row.find('.js-status');
-                            var newstatus = status.text().trim() === 'Deleted' ? 'Available' : 'Deleted';
-                            status.text(newstatus).toggleClass('badge-light-danger badge-light-success');
-
-
+                            var newStatus = status.text().trim() === 'Deleted' ? 'Available' : 'Deleted';
+                            status.text(newStatus).toggleClass('badge-light-success badge-light-danger');
                             row.find('.js-updated-on').html(lastUpdatedOn);
-                            row.addClass('animate__animated animate__flash')
+                            row.addClass('animate__animated animate__flash');
 
-                            showMassegeSuccessfully();
+                            showSuccessMessage();
                         },
                         error: function () {
-                            showMassegeErorr();
+                            showErrorMessage();
                         }
                     });
-
                 }
             }
         });
     });
 
-
-
+    //Hanlde signout
+    $('.js-signout').on('click', function () {
+        $('#SignOut').submit();
+    });
 });

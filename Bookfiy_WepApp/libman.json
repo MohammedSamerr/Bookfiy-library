@@ -43,6 +43,10 @@
     {
       "library": "fslightbox@3.3.1",
       "destination": "wwwroot/lib/fslightbox/"
+    },
+    {
+      "library": "tinymce@6.3.1",
+      "destination": "wwwroot/tinymce/"
     }
   ]
 }

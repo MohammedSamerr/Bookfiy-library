@@ -1,13 +1,16 @@
 ﻿@model IEnumerable<AuthorViewModel>
-@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery ;
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery
+
 @{
     ViewData["Title"] = "Authors";
 }
-@section Styles{
-    <link href="~/assets/plugins/datatables/datatables.bundle.css" rel="stylesheet" />
+
+@section Styles
+    {
+    <link rel="stylesheet" href="~/assets/plugins/datatables/datatables.bundle.css" />
 }
 
-    <div class="alert bg-light-primary border border-primary border-3  d-flex justify-content-between w-100 p-5 mb-10">
+    <div class="alert bg-light-primary border border-primary border-3 border-dashed d-flex justify-content-between w-100 p-5 mb-10">
         <div class="d-flex align-items-center">
             <div class="symbol symbol-40px me-4">
                 <div class="symbol-label fs-2 fw-semibold text-success">
@@ -37,11 +40,10 @@
     </div>
 
     <div class="card shadow-sm">
-
         <partial name="_DataTabelCardHeader" />
         <div class="card-body pt-0">
             <div class="table-responsive">
-                <table class="table table-row-dashed table-row-gray-300 gy-2 align-middle js-datatable" data-document-title="Authors">
+                <table class="table table-row-dashed table-row-gray-300 gy-2 align-middle js-datatables" data-document-title="Auhtors">
                     <thead>
                         <tr class="fw-bold fs-6 text-gray-800">
                             <th>Name</th>
@@ -52,9 +54,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                    @foreach (var item in Model)
+                    @foreach (var author in Model)
                     {
-                        <partial name="_AuthorRow" model="@item" />
+                        <partial name="_AuthorRow" model="@author" />
                     }
                 </tbody>
             </table>
@@ -64,11 +66,12 @@
 
 <input type="hidden" name="__RequestVerificationToken" value="@antiforgery.GetAndStoreTokens(Context).RequestToken" />
 
-@section Plugins{
+@section Plugins
+    {
     <script src="~/assets/plugins/datatables/datatables.bundle.js"></script>
 }
 
-    @section Scripts{
+    @section Scripts
+    {
     <partial name="_ValidationScriptsPartial" />
- 
 }

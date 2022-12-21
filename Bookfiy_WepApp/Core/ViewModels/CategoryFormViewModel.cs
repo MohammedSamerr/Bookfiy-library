@@ -7,7 +7,7 @@ namespace Bookfiy_WepApp.Core.ViewModels
     {
         public int Id { get; set; }
 
-        [MaxLength(100, ErrorMessage = ErrorValidation.MaxLength), Display(Name = "Author")]
+        [MaxLength(100, ErrorMessage = ErrorValidation.MaxLength), Display(Name = "Category")]
         [Remote("AllowItem", null, AdditionalFields = "Id", ErrorMessage = ErrorValidation.Dublicated)]
         public string Name { get; set; } = null!;
     }

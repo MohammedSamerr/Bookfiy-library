@@ -19,7 +19,7 @@ namespace Bookfiy_WepApp.Helpres
             if(string.IsNullOrEmpty(ActiveWhen))
                 return;
 
-            var currentController = ViewContextData?.RouteData.Values["controller"]?.ToString();
+            var currentController = ViewContextData?.RouteData.Values["controller"]?.ToString() ?? String.Empty;
 
             if(currentController! .Equals(ActiveWhen))
             {
