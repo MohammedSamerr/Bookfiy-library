@@ -1,6 +1,5 @@
 ﻿@model UserFormViewModel
 
-
 <form asp-action="@(!string.IsNullOrEmpty(Model?.Id) ? "Edit" : "Create")"
       data-ajax-method="post"
       data-ajax="true"

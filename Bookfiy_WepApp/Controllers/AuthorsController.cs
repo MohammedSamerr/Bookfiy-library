@@ -1,12 +1,16 @@
 ﻿using AutoMapper;
+using Bookfiy_WepApp.Core.Const;
 using Bookfiy_WepApp.Core.Models;
 using Bookfiy_WepApp.Data;
 using Bookfiy_WepApp.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Bookfiy_WepApp.Controllers
 {
+    [Authorize(Roles = AddRoles.Archive)]
     public class AuthorsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -37,12 +41,14 @@ namespace Bookfiy_WepApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(AuthorFormViewModel model)
+        public  IActionResult Create(AuthorFormViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
 
             var author = _mapper.Map<Author>(model);
+            author.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+
             _context.Add(author);
             _context.SaveChanges();
 
@@ -78,6 +84,7 @@ namespace Bookfiy_WepApp.Controllers
                 return NotFound();
 
             author = _mapper.Map(model, author);
+            author.LastUpdateById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             author.LastUpdateOn = DateTime.Now;
 
             _context.SaveChanges();
@@ -97,6 +104,7 @@ namespace Bookfiy_WepApp.Controllers
                 return NotFound();
 
             author.IsDelete = !author.IsDelete;
+            author.LastUpdateById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             author.LastUpdateOn = DateTime.Now;
 
             _context.SaveChanges();

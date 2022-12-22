@@ -1,14 +1,18 @@
 ﻿using AutoMapper;
+using Bookfiy_WepApp.Core.Const;
 using Bookfiy_WepApp.Core.Mapping;
 using Bookfiy_WepApp.Core.Models;
 
 using Bookfiy_WepApp.Data;
 using Bookfiy_WepApp.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Bookfiy_WepApp.Controllers
 {
+    [Authorize(Roles = AddRoles.Archive)]
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -42,6 +46,7 @@ namespace Bookfiy_WepApp.Controllers
                 return BadRequest();
 
             var category = _mapper.Map<Category>(model);
+            category.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             _context.Categories.Add(category);
             _context.SaveChanges();
 
@@ -77,7 +82,7 @@ namespace Bookfiy_WepApp.Controllers
 
             category.Name = model.Name;
             category.LastUpdateOn = DateTime.Now;
-
+            category.LastUpdateById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             _context.SaveChanges();
 
             var viewModel = _mapper.Map<CategoryViewModel>(category);
@@ -93,6 +98,7 @@ namespace Bookfiy_WepApp.Controllers
 
             category.IsDelete = !category.IsDelete;
             category.LastUpdateOn = DateTime.Now;
+            category.LastUpdateById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             _context.SaveChanges();
             return Ok(category.LastUpdateOn.ToString());
         }

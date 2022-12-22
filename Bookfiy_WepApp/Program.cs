@@ -26,6 +26,14 @@ builder.Services.AddIdentity<ApplicationUser , IdentityRole>(options => options.
     .AddDefaultUI()
     .AddDefaultTokenProviders();
 
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequiredLength = 8;
+    options.User.RequireUniqueEmail = true;
+
+});
+
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(MappingProfile)));

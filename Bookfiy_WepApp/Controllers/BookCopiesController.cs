@@ -1,13 +1,17 @@
 ﻿using AutoMapper;
+using Bookfiy_WepApp.Core.Const;
 using Bookfiy_WepApp.Core.Models;
 using Bookfiy_WepApp.Data;
 using Bookfiy_WepApp.Filters;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Security.Claims;
 
 namespace Bookfiy_WepApp.Controllers
 {
+    [Authorize(Roles = AddRoles.Archive)]
     public class BookCopiesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -32,6 +36,7 @@ namespace Bookfiy_WepApp.Controllers
                 return NotFound();
 
             books.IsDelete = !books.IsDelete;
+            books.LastUpdateById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             books.LastUpdateOn = DateTime.Now;
 
             _context.SaveChanges();
@@ -71,8 +76,9 @@ namespace Bookfiy_WepApp.Controllers
             var copy = new BookCopy
             {
                 EdditionNumber = model.EdditionNumber,
-                IsAvailabbleForRent = book.IsAvailabbleForRent ? model.IsAvailabbleForRent : false
-            };
+                IsAvailabbleForRent = book.IsAvailabbleForRent ? model.IsAvailabbleForRent : false,
+                CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+        };
 
             book.Copies.Add(copy);
             _context.SaveChanges();
@@ -110,7 +116,7 @@ namespace Bookfiy_WepApp.Controllers
             copy.EdditionNumber = model.EdditionNumber;
             copy.IsAvailabbleForRent = model.IsAvailabbleForRent;
             copy.LastUpdateOn = DateTime.Now;
-
+            copy.LastUpdateById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             _context.SaveChanges();
 
             var viewModel = _mapper.Map<BookCopyViewModel>(copy);

@@ -7,20 +7,24 @@ using Bookfiy_WepApp.Filters;
 using Bookfiy_WepApp.settings;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using System.Data;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Security.Claims;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Reflection.Metadata.BlobBuilder;
 using Image = SixLabors.ImageSharp.Image;
 
 namespace Bookfiy_WepApp.Controllers
 {
+    [Authorize(Roles = AddRoles.Archive)]
     public class BooksController : Controller
     {
         private readonly IWebHostEnvironment _webHostEnvironment; // to get wwwroot path
@@ -104,7 +108,7 @@ namespace Bookfiy_WepApp.Controllers
 
             books.IsDelete = !books.IsDelete;
             books.LastUpdateOn = DateTime.Now;
-
+            books.LastUpdateById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             _context.SaveChanges();
 
             return Ok();
@@ -177,7 +181,7 @@ namespace Bookfiy_WepApp.Controllers
                 //book.ImageThumbnailUrl = GetThumbnailUrl(book.ImageUrl);
                 //book.ImagePublicId = result.PublicId;
             }
-
+            book.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             foreach (var category in model.SelectedCategories)
                 book.Categories.Add(new Books_Categories { CategoryId = category });
 
@@ -213,7 +217,7 @@ namespace Bookfiy_WepApp.Controllers
             {
                 return View("Form", PopulateViewModel(model));
             }
-            var book = _context.Books.Include(b => b.Categories).SingleOrDefault(b => b.Id == model.Id);
+            var book = _context.Books.Include(b => b.Categories).Include(c=>c.Copies).SingleOrDefault(b => b.Id == model.Id);
 
 
             if (book is null)
@@ -291,9 +295,10 @@ namespace Bookfiy_WepApp.Controllers
 
             book = _mapper.Map(model, book);
             book.LastUpdateOn = DateTime.Now;
+            book.LastUpdateById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             //book.ImageThumnailURL = GetThumbnailUrl(book.ImageURL!);
             //book.ImagePublicId = imagePublicId;
-
+            
             foreach (var category in model.SelectedCategories)
             {
                 book.Categories.Add(new Books_Categories
@@ -301,7 +306,13 @@ namespace Bookfiy_WepApp.Controllers
                     CategoryId = category
                 });
             }
-
+            if (!model.IsAvailabbleForRent)
+            {
+                foreach (var copy in book.Copies)
+                {
+                    copy.IsAvailabbleForRent = false;
+                }
+            }
             _context.SaveChanges();
 
 

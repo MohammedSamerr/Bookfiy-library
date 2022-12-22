@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Bookfiy_WepApp.Core.Models;
+using Bookfiy_WepApp.Core.ViewModels;
 using Bookfiy_WepApp.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -71,7 +72,134 @@ namespace Bookfiy_WepApp.Controllers
                 return PartialView("_UsersRow", viewModel);
             }
 
-            return BadRequest();
+            return BadRequest(string.Join(',',result.Errors.Select(e => e.Description)));
+        }
+        public async Task<IActionResult> AllowUser(UserFormViewModel model)
+        {
+            var user = await _userManager.FindByNameAsync(model.UserName);
+            var isAllowed = user is null || user.Id.Equals(model.Id);
+            return Json(isAllowed);
+        }
+
+        public async Task<IActionResult> AllowEmail(UserFormViewModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            var isAllowed = user is null || user.Id.Equals(model.Id);
+            return Json(isAllowed);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleStatus(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (id is null)
+                return NotFound();
+
+            user.IsDelete = !user.IsDelete;
+            user.LastUpdateById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            user.LastUpdateOn = DateTime.Now;
+            await _userManager.UpdateAsync(user);
+            return Ok(user.LastUpdateOn.ToString());
+        }
+
+        [HttpGet]
+        [Ajax_]
+        public async Task<IActionResult> ResetPassword(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user is null)
+                return NotFound();
+
+            var viewModel = new ResetPasswordFormViewModel { Id = user.Id };
+            return PartialView("_ResetPassword", viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordFormViewModel model )
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user is null)
+                return NotFound();
+            var currentPass = user.PasswordHash;
+            await _userManager.RemovePasswordAsync(user);
+            var result = await _userManager.AddPasswordAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                user.LastUpdateOn = DateTime.Now;
+                user.LastUpdateById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+                await _userManager.UpdateAsync(user);
+                var viewModel = _mapper.Map<UsersViewModel>(user);
+                return PartialView("_UsersRow", viewModel);
+            }
+
+            user.PasswordHash = currentPass;
+            await _userManager.UpdateAsync(user);
+
+            return BadRequest(string.Join(',', result.Errors.Select(e => e.Description)));
+        }
+
+        [HttpGet]
+        [Ajax_]
+        public async Task<IActionResult> Edit(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user is null)
+                return NotFound();
+
+            var viewModel = _mapper.Map<UserFormViewModel>(user);
+
+            viewModel.SelectedRoles = await _userManager.GetRolesAsync(user);
+            viewModel.Roles = await _roleManager.Roles
+                                .Select(r => new SelectListItem
+                                {
+                                    Text = r.Name,
+                                    Value = r.Name
+                                })
+                                .ToListAsync();
+
+            return PartialView("_Form", viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(UserFormViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var user = await _userManager.FindByIdAsync(model.Id);
+
+            if (user is null)
+                return NotFound();
+
+            user = _mapper.Map(model, user);
+            user.LastUpdateById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+            user.LastUpdateOn = DateTime.Now;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                var currentRoles = await _userManager.GetRolesAsync(user);
+
+                var rolesUpdated = !currentRoles.SequenceEqual(model.SelectedRoles);
+
+                if (rolesUpdated)
+                {
+                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                    await _userManager.AddToRolesAsync(user, model.SelectedRoles);
+                }
+
+                var viewModel = _mapper.Map<UsersViewModel>(user);
+                return PartialView("_UsersRow", viewModel);
+            }
+
+            return BadRequest(string.Join(',', result.Errors.Select(e => e.Description)));
         }
     }
 }
