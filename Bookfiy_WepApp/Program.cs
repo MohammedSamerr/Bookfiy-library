@@ -1,6 +1,7 @@
 using Bookfiy_WepApp.Core.Mapping;
 using Bookfiy_WepApp.Core.Models;
 using Bookfiy_WepApp.Data;
+using Bookfiy_WepApp.Helpres;
 using Bookfiy_WepApp.seeds;
 using Bookfiy_WepApp.settings;
 using Microsoft.AspNetCore.Identity;
@@ -30,9 +31,11 @@ builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequiredLength = 8;
     options.User.RequireUniqueEmail = true;
-
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
+    options.Lockout.MaxFailedAccessAttempts = 3;
 });
 
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApllicationUserClaims>();
 
 builder.Services.AddControllersWithViews();
 
