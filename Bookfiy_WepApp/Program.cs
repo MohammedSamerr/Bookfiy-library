@@ -3,8 +3,10 @@ using Bookfiy_WepApp.Core.Models;
 using Bookfiy_WepApp.Data;
 using Bookfiy_WepApp.Helpres;
 using Bookfiy_WepApp.seeds;
+using Bookfiy_WepApp.Services;
 using Bookfiy_WepApp.settings;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
@@ -36,11 +38,14 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApllicationUserClaims>();
-
+builder.Services.AddTransient<IimageService, ImageService>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddTransient<IEmailBodyBuilder, EmailBodyBuilder>();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(MappingProfile)));
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
 builder.Services.AddExpressiveAnnotations();
 
 var app = builder.Build();

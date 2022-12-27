@@ -14,6 +14,9 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
+using Bookfiy_WepApp.Services;
 
 namespace Bookfiy_WepApp.Areas.Identity.Pages.Account
 {
@@ -22,11 +25,13 @@ namespace Bookfiy_WepApp.Areas.Identity.Pages.Account
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly IEmailBodyBuilder _emailBodyBuilder;
 
-        public ResendEmailConfirmationModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        public ResendEmailConfirmationModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender, IEmailBodyBuilder emailBodyBuilder)
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _emailBodyBuilder = emailBodyBuilder;
         }
 
         /// <summary>
@@ -47,12 +52,15 @@ namespace Bookfiy_WepApp.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
-            [EmailAddress]
-            public string Email { get; set; }
+            public string UserName { get; set; }
         }
 
-        public void OnGet()
+        public void OnGet(string username)
         {
+            Input = new InputModel
+            {
+                UserName = username
+            };
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -62,7 +70,8 @@ namespace Bookfiy_WepApp.Areas.Identity.Pages.Account
                 return Page();
             }
 
-            var user = await _userManager.FindByEmailAsync(Input.Email);
+            var user = await _userManager.Users.SingleOrDefaultAsync(u =>
+                (u.NormalizedUserName == Input.UserName.ToUpper() || u.NormalizedEmail == Input.UserName.ToUpper()) && !u.IsDelete);
             if (user == null)
             {
                 ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
@@ -77,10 +86,17 @@ namespace Bookfiy_WepApp.Areas.Identity.Pages.Account
                 pageHandler: null,
                 values: new { userId = userId, code = code },
                 protocol: Request.Scheme);
+
+            var body = _emailBodyBuilder.GetEmailBody("https://drive.google.com/file/d/15ZoYmz7zYv6_a80WdPqnHtbUy8xa7HwQ/view?usp=share_link",
+                $"Hey {user.FullName}, Thanks for Joining us!",
+                "Please Confirm Your Email",
+                $"{HtmlEncoder.Default.Encode(callbackUrl!)}",
+                "Activate Account");
+
             await _emailSender.SendEmailAsync(
-                Input.Email,
+                user.Email,
                 "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                body);
 
             ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
             return Page();

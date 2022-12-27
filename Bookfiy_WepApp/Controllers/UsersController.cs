@@ -4,10 +4,15 @@ using Bookfiy_WepApp.Core.ViewModels;
 using Bookfiy_WepApp.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
+using System.Text;
+using Bookfiy_WepApp.Services;
 
 namespace Bookfiy_WepApp.Controllers
 {
@@ -16,16 +21,21 @@ namespace Bookfiy_WepApp.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IEmailSender _emailSender;
+        private readonly IEmailBodyBuilder _emailBodyBuilder;
         private readonly IMapper _mapper;
-        public UsersController(UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager)
+        public UsersController(UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager, IEmailSender emailSender, IWebHostEnvironment webHostEnvironment, IEmailBodyBuilder emailBodyBuilder)
         {
             _userManager = userManager;
             _mapper = mapper;
             _roleManager = roleManager;
+            _emailSender = emailSender;
+            _emailBodyBuilder = emailBodyBuilder;
         }
 
         public async Task<IActionResult> Index()
         {
+            
             var users = await _userManager.Users.ToListAsync();
             var viewModel  = _mapper.Map<IEnumerable<UsersViewModel>>(users);
             return View(viewModel);
@@ -67,6 +77,21 @@ namespace Bookfiy_WepApp.Controllers
             if (result.Succeeded)
             {
                 await _userManager.AddToRolesAsync(user, model.SelectedRoles);
+
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var callbackUrl = Url.Page(
+                    "/Account/ConfirmEmail",
+                    pageHandler: null,
+                    values: new { area = "Identity", userId = user.Id, code = code },
+                    protocol: Request.Scheme);
+
+                var body = _emailBodyBuilder.GetEmailBody("https://drive.google.com/file/d/15ZoYmz7zYv6_a80WdPqnHtbUy8xa7HwQ/view?usp=share_link",
+                    $"Hey {user.FullName}, Thanks for Joining us!", "Please Confirm Your Email",
+                    $"{HtmlEncoder.Default.Encode(callbackUrl!)}", "Activate Account");
+
+                await _emailSender.SendEmailAsync(model.Email, "Confirm your email",body);
+
 
                 var viewModel = _mapper.Map<UsersViewModel>(user);
                 return PartialView("_UsersRow", viewModel);

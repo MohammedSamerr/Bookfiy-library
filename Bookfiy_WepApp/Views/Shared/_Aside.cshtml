@@ -1,4 +1,5 @@
-﻿<!--begin::Aside-->
+﻿@using Bookfiy_WepApp.Core.Const
+<!--begin::Aside-->
 <div id="kt_aside" class="aside card" data-kt-drawer="true" data-kt-drawer-name="aside" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'200px', '300px': '250px'}" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_aside_toggle">
     <!--begin::Aside menu-->
     <div class="aside-menu flex-column-fluid px-4">
@@ -23,6 +24,7 @@
                     </a>
                     <!--end:Menu link-->
                     <!--begin:Menu link-->
+                    @if(User.IsInRole(AddRoles.Archive)){
                     <a class="menu-link" asp-controller="Categories" asp-action="Index" active-when="Categories">
                         <span class="menu-icon">
                             <!--begin::Svg Icon | path: icons/duotune/general/gen002.svg-->
@@ -62,9 +64,12 @@
                             <!--end::Svg Icon-->
                         </span>
                         <span class="menu-title">Books</span>
-                    </a>
+                        </a>
+                    }
                     <!--end:Menu link-->
+                        @if(User.IsInRole(AddRoles.Admin)){
                     <!--begin:Menu link-->
+                    
                     <a class="menu-link" asp-controller="Users" asp-action="Index" active-when="Users">
                         <span class="menu-icon">
                             <!--begin::Svg Icon | path: icons/duotune/general/gen002.svg-->
@@ -76,10 +81,11 @@
                                 </svg>
                             </span>
                             <!--end::Svg Icon-->
-                        </span>
+                            </span>
                         <span class="menu-title">Users</span>
                     </a>
-                    <!--end:Menu link-->
+                        <!--end:Menu link-->
+                    }
                 </div>
                 <!--end:Menu item-->
             </div>

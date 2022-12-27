@@ -6,7 +6,9 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Bookfiy_WepApp.Core.Const;
 using Bookfiy_WepApp.Core.Models;
+using Bookfiy_WepApp.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -17,13 +19,16 @@ namespace Bookfiy_WepApp.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IimageService _imageService;
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            IimageService imageService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _imageService = imageService;
         }
 
         /// <summary>
@@ -56,9 +61,21 @@ namespace Bookfiy_WepApp.Areas.Identity.Pages.Account.Manage
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
+            /// 
+
+            [Required,MaxLength(20, ErrorMessage = ErrorValidation.MaxLength), Display(Name = " Full Name")
+            , RegularExpression(Regx.CharactersOnly_Eng, ErrorMessage = ErrorValidation.OnlyEnglish)]
+            public string Fullname { get; set; } = null!;
+
             [Phone]
-            [Display(Name = "Phone number")]
+            [Display(Name = "Phone number"),
+                MaxLength(11, ErrorMessage = ErrorValidation.MaxLength),
+                RegularExpression(Regx.PhoneNumber, ErrorMessage = ErrorValidation.PhoneNumber)]
             public string PhoneNumber { get; set; }
+
+            public IFormFile Avatar { get; set; }
+
+            public bool ImageRemoved { get; set; }
         }
 
         private async Task LoadAsync(ApplicationUser user)
@@ -70,6 +87,7 @@ namespace Bookfiy_WepApp.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
+                Fullname = user.FullName,
                 PhoneNumber = phoneNumber
             };
         }
@@ -99,14 +117,40 @@ namespace Bookfiy_WepApp.Areas.Identity.Pages.Account.Manage
                 await LoadAsync(user);
                 return Page();
             }
+            
+            if(Input.Avatar is not null)
+            {
+                _imageService.Delete($"/images/Users/{user.Id}.png");
+                var result = await _imageService.UploadAsync(Input.Avatar , $"{user.Id}.png","/images/Users",false);
+                if (!result.isUploded)
+                {
+                    ModelState.AddModelError("Input.Avatar", result.errorMessage!);
+                    await LoadAsync(user);
+                    return Page();
+                }
+            }
+            else if( Input.ImageRemoved)
+                _imageService.Delete($"/images/Users/{user.Id}.png");
+
 
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             if (Input.PhoneNumber != phoneNumber)
             {
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+           
                 if (!setPhoneResult.Succeeded)
                 {
                     StatusMessage = "Unexpected error when trying to set phone number.";
+                    return RedirectToPage();
+                }
+            }
+            if(Input.Fullname != user.FullName)
+            {
+                user.FullName = Input.Fullname;
+                var setFullName = await _userManager.UpdateAsync(user);
+                if (!setFullName.Succeeded)
+                {
+                    StatusMessage = "Unexpected error when trying to set Full Name.";
                     return RedirectToPage();
                 }
             }

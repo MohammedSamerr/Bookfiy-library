@@ -16,5 +16,6 @@
         public const string OnlyArabic = "Only Arabic letters are allowed.";
         public const string OnlyNumberandLeter = "Only Arabic/English letters or digits are allowed.";
         public const string DenySpecialCharacters = "Special characters are not allowed.";
+        public const string PhoneNumber = "Invalid Phone Number.";
     }
 }

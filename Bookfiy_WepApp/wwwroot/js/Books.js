@@ -34,7 +34,7 @@
                     return `<div class="symbol symbol-50px overflow-hidden me-3">
                                                                                                 <a href="/Books/Details/${row.id}">
                                                                                                     <div class="symbol-label h-70px">
-                                                                                                                        <img src="${(row.imageThumnailURL === null ? '/images/Books/no-book.jpg' : row.imageThumnailURL)}" alt="cover" class="w-100">
+                                                                                                                        <img src="${(row.imageURL === null ? '/images/Books/no-book.jpg' : row.imageURL)}" alt="cover" class="w-100">
                                                                                                     </div>
                                                                                                 </a>
                                                                                             </div>

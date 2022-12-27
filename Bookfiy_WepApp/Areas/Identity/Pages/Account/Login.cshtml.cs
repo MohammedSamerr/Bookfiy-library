@@ -142,6 +142,10 @@ namespace Bookfiy_WepApp.Areas.Identity.Pages.Account
                     _logger.LogWarning("User account locked out.");
                     return RedirectToPage("./Lockout");
                 }
+                if (result.IsNotAllowed)
+                {
+                    return RedirectToPage("./ResendEmailConfirmation", new { username = Input.UserName });
+                }
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");

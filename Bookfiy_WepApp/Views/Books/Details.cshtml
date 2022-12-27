@@ -14,7 +14,7 @@
                 <!--begin::Image-->
                 <div class="d-flex flex-center flex-shrink-0 bg-light rounded w-100px h-100px w-lg-150px h-lg-150px me-7 mb-4">
                     <a data-fslightbox href="@(string.IsNullOrEmpty(Model.ImageURL) ? "/images/books/no-book.jpg" : Model.ImageURL)">
-                        <img class="mw-50px mw-lg-75px" src="@(string.IsNullOrEmpty(Model.ImageThumnailURL) ? "/images/books/no-book.jpg" : Model.ImageThumnailURL)" alt="@Model.Title" />
+                        <img class="mw-50px mw-lg-75px" src="@(string.IsNullOrEmpty(Model.ImageURL) ? "/images/books/no-book.jpg" : Model.ImageURL)" alt="@Model.Title" />
                     </a>
                 </div>
                 <!--end::Image-->
