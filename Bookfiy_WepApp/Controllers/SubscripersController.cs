@@ -1,8 +1,10 @@
 ﻿using Bookfiy_WepApp.Core.Const;
 using Bookfiy_WepApp.Core.Models;
+using Bookfiy_WepApp.Core.ViewModels;
 using Bookfiy_WepApp.Data;
 using Bookfiy_WepApp.Filters;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SixLabors.ImageSharp;
@@ -14,13 +16,15 @@ namespace Bookfiy_WepApp.Controllers
     public class SubscripersController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IDataProtector _dataProtector;
         private readonly IMapper _mapper;
         private readonly IimageService _imageService;
-        public SubscripersController(ApplicationDbContext context, IMapper mapper, IimageService imageService)
+        public SubscripersController(ApplicationDbContext context, IMapper mapper, IimageService imageService, IDataProtectionProvider dataProtector)
         {
             _context = context;
             _mapper = mapper;
             _imageService = imageService;
+            _dataProtector = dataProtector.CreateProtector("MySecureKy");
         }
 
         public IActionResult Index()
@@ -28,10 +32,55 @@ namespace Bookfiy_WepApp.Controllers
             return View();
         }
 
+        #region Search
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Search(SearchFormViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var subscriber = _context.Subscripers
+                            .SingleOrDefault(s =>
+                                    s.Email == model.Value
+                                || s.NantionalId == model.Value
+                                || s.MobileNumber == model.Value);
+
+            var viewModel = _mapper.Map<SubscriberSearchViewModel>(subscriber);
+
+            if (subscriber is not null)
+                viewModel.Key = _dataProtector.Protect(subscriber.Id.ToString());
+
+            return PartialView("_Result", viewModel);
+        }
+        #endregion
+
+        #region Details
+        public IActionResult Details(string id)
+        {
+            var subscriberId = int.Parse(_dataProtector.Unprotect(id));
+
+            var subscriber = _context.Subscripers
+                .Include(s => s.Governorate)
+                .Include(s => s.Area)
+                .SingleOrDefault(s => s.Id == subscriberId);
+
+            if (subscriber is null)
+                return NotFound();
+
+            var viewModel = _mapper.Map<SubscriperViewModel>(subscriber);
+            viewModel.Key = id;
+
+            return View(viewModel);
+        }
+        #endregion
+
         #region Create
         public IActionResult Create()
         {
-            return View("_Form", PopulateViewModel());
+            var viewModel = PopulateViewModel();
+            return View("_Form", viewModel);
         }
 
         [HttpPost]
@@ -43,39 +92,45 @@ namespace Bookfiy_WepApp.Controllers
 
             var subscriber = _mapper.Map<Subscriper>(model);
 
-            if (model.Image is not null)
+            var imageName = $"{Guid.NewGuid()}{Path.GetExtension(model.Image!.FileName)}";
+            var imagePath = "/images/Subscriber";
+
+            var (isUploaded, errorMessage) = await _imageService.UploadAsync(model.Image, imageName, imagePath, hasThumbnail: true);
+
+            if (!isUploaded)
             {
-                var imageName = $"{Guid.NewGuid()}{Path.GetExtension(model.Image.FileName)}";
-
-                var result = await _imageService.UploadAsync(model.Image, imageName, "/images/Subscriber", hasThumbnail: true);
-
-                if (!result.isUploded)
-                {
-                    ModelState.AddModelError("Image", result.errorMessage!);
-                    return View("_Form", PopulateViewModel(model));
-
-                }
-                subscriber.ImageUrl = $"/images/Subscriber/{imageName}";
-                subscriber.ImageThumbnailUrl = $"/images/Subscriber/thumb/{imageName}";
+                ModelState.AddModelError("Image", errorMessage!);
+                return View("_Form", PopulateViewModel(model));
             }
+
+            subscriber.ImageUrl = $"{imagePath}/{imageName}";
+            subscriber.ImageThumbnailUrl = $"{imagePath}/thumb/{imageName}";
             subscriber.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
             _context.Add(subscriber);
             _context.SaveChanges();
-            return RedirectToAction(nameof(Details), new { id = subscriber.Id });
 
+            //TODO: Send welcome email
+
+            var subscriberId = _dataProtector.Protect(subscriber.Id.ToString());
+
+            return RedirectToAction(nameof(Details), new { id = subscriberId });
         }
         #endregion
 
         #region Edit
-        public IActionResult Edit(int id)
+        public IActionResult Edit(string id)
         {
-            var subscriber = _context.Subscripers.SingleOrDefault(s => s.Id == id);
+            var subsciberId = int.Parse(_dataProtector.Unprotect(id));
+            var subscriber = _context.Subscripers.SingleOrDefault(s => s.Id == subsciberId);
             if (subscriber is null)
                 return NotFound();
 
             var model = _mapper.Map<SubscriperFormViewModel>(subscriber);
-            return View("_Form",PopulateViewModel(model));
+
+            var viewModel = PopulateViewModel(model);
+            viewModel.Key = id;
+            return View("_Form", viewModel);
         }
 
         [HttpPost]
@@ -85,7 +140,9 @@ namespace Bookfiy_WepApp.Controllers
             if (!ModelState.IsValid)
                 return View("_Form",PopulateViewModel(model));
 
-            var subscriper = _context.Subscripers.Find(model.Id);
+            var subscriberId = int.Parse(_dataProtector.Unprotect(model.Key));
+
+            var subscriper = _context.Subscripers.Find(subscriberId);
 
             if (subscriper is null)
                 return NotFound();
@@ -115,39 +172,7 @@ namespace Bookfiy_WepApp.Controllers
             subscriper.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             subscriper.LastUpdateOn = DateTime.Now;
             _context.SaveChanges();
-            return RedirectToAction(nameof(Details), new { id = subscriper.Id });
-        }
-        #endregion
-
-        #region Search
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> search(SearchFormViewModel model)
-        {
-            if (!ModelState.IsValid)
-                return View(nameof(Index), model);
-
-            var subscriber = await _context.Subscripers
-                .SingleOrDefaultAsync(s => s.MobileNumber == model.Value ||
-                s.NantionalId == model.Value || s.Email == model.Value && !s.IsDelete);
-
-            var viewModel = _mapper.Map<SubscriberSearchViewModel>(subscriber);
-
-            return PartialView("_Result", viewModel); 
-        }
-        #endregion
-
-        #region Details
-        public async Task<IActionResult> Details(int id)
-        {
-            var subscriber = await _context.Subscripers.Include(g=>g.Governorate).Include(a=>a.Area).SingleOrDefaultAsync(s => s.Id == id);
-
-            if (subscriber is null)
-                return BadRequest();
-
-            var viewModel = _mapper.Map<SubscriperViewModel>(subscriber);
-            return View(viewModel);
+            return RedirectToAction(nameof(Details), new { id = model.Key });
         }
         #endregion
 
@@ -155,24 +180,30 @@ namespace Bookfiy_WepApp.Controllers
         [Ajax_]
         public IActionResult GetArea(int governoateId)
         {
-            var areas = _context.Areas.Where(a => a.GovernorateId == governoateId && !a.IsDelete)
-                .OrderBy(g => g.Name).ToList();
+            var areas = _context.Areas
+                    .Where(a => a.GovernorateId == governoateId && !a.IsDelete)
+                    .OrderBy(g => g.Name)
+                    .ToList();
 
             return Ok(_mapper.Map<IEnumerable<SelectListItem>>(areas));
         }
         public SubscriperFormViewModel PopulateViewModel(SubscriperFormViewModel? model = null)
         {
             SubscriperFormViewModel viewModel = model is null ? new SubscriperFormViewModel() : model;
-            var governorate = _context.Governorates.Where(a => !a.IsDelete).OrderBy(a => a.Name).ToList();
-            viewModel.Governorates = _mapper.Map<IEnumerable<SelectListItem>>(governorate);
+
+            var governorates = _context.Governorates.Where(a => !a.IsDelete).OrderBy(a => a.Name).ToList();
+            viewModel.Governorates = _mapper.Map<IEnumerable<SelectListItem>>(governorates);
 
             if (model?.GovernorateId > 0)
             {
                 var areas = _context.Areas
-                    .Where(g => g.GovernorateId == model.GovernorateId && !g.IsDelete)
-                    .OrderBy(n => n.Name).ToList();
+                    .Where(a => a.GovernorateId == model.GovernorateId && !a.IsDelete)
+                    .OrderBy(a => a.Name)
+                    .ToList();
+
                 viewModel.Areas = _mapper.Map<IEnumerable<SelectListItem>>(areas);
             }
+
             return viewModel;
         }
         #endregion
@@ -180,21 +211,33 @@ namespace Bookfiy_WepApp.Controllers
         #region validation
         public IActionResult AllowNationalId(SubscriperFormViewModel model)
         {
+            var subscriberId = 0;
+            if(!string.IsNullOrEmpty(model.Key))
+                subscriberId = int.Parse(_dataProtector.Unprotect(model.Key));
+
             var subscriper = _context.Subscripers.SingleOrDefault(s => s.NantionalId == model.NantionalId);
-            var isAllowed = subscriper is null || subscriper.Id.Equals(model.Id);
+            
+            var isAllowed = subscriper is null || subscriper.Id.Equals(subscriberId);
             return Json(isAllowed);
         }
         public IActionResult AllowMobileNumber(SubscriperFormViewModel model)
         {
+            var subscriberId = 0;
+            if (!string.IsNullOrEmpty(model.Key))
+                subscriberId = int.Parse(_dataProtector.Unprotect(model.Key));
+
             var subscriper = _context.Subscripers.SingleOrDefault(s => s.MobileNumber == model.MobileNumber);
-            var isAllowed = subscriper is null || subscriper.Id.Equals(model.Id);
+            var isAllowed = subscriper is null || subscriper.Id.Equals(subscriberId);
             return Json(isAllowed);
         }
-
         public IActionResult AllowEmail(SubscriperFormViewModel model)
         {
+            var subscriberId = 0;
+            if (!string.IsNullOrEmpty(model.Key))
+                subscriberId = int.Parse(_dataProtector.Unprotect(model.Key));
+
             var subscriper = _context.Subscripers.SingleOrDefault(s => s.Email == model.Email);
-            var isAllowed = subscriper is null || subscriper.Id.Equals(model.Id);
+            var isAllowed = subscriper is null || subscriper.Id.Equals(subscriberId);
             return Json(isAllowed);
         }
         #endregion

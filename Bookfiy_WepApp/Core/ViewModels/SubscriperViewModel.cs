@@ -5,6 +5,7 @@ namespace Bookfiy_WepApp.Core.ViewModels
     public class SubscriperViewModel
     {
         public int Id { get; set; }
+        public string? Key { get; set; }
         public string FullName { get; set; } = null!;
         public DateTime DateOfBirth { get; set; }
         public string NantionalId { get; set; } = null!;

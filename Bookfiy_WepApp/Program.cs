@@ -5,6 +5,7 @@ using Bookfiy_WepApp.Helpres;
 using Bookfiy_WepApp.seeds;
 using Bookfiy_WepApp.Services;
 using Bookfiy_WepApp.settings;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.MaxFailedAccessAttempts = 3;
 });
 
+builder.Services.AddDataProtection().SetApplicationName(nameof(Bookfiy_WepApp));
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApllicationUserClaims>();
 builder.Services.AddTransient<IimageService, ImageService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
