@@ -1,2 +1,13 @@
 ﻿global using System.ComponentModel.DataAnnotations;
-global using Bookfiy_WepApp.Core.ViewModels; 
+global using Bookfiy_WepApp.Core.ViewModels;
+global using AutoMapper;
+global using Bookfiy_WepApp.Core.Const;
+global using Bookfiy_WepApp.Core.Models;
+global using Bookfiy_WepApp.Data;
+global using Bookfiy_WepApp.Filters;
+global using Bookfiy_WepApp.settings;
+global using Bookfiy_WepApp.Services;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.AspNetCore.Authorization;
+global using System.Security.Claims;

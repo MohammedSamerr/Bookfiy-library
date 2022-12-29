@@ -14,7 +14,7 @@ namespace Bookfiy_WepApp.Core.ViewModels
         [MaxLength(500, ErrorMessage = ErrorValidation.MaxLength)]
         [Remote("AllowItem", null!, AdditionalFields = "Id,AuthorId", ErrorMessage = ErrorValidation.Dublicated)]
         public string Title { get; set; } = null!;
-
+         
 
 
         [Display(Name = "Author") ]
