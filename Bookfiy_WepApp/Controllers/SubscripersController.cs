@@ -5,9 +5,14 @@ using Bookfiy_WepApp.Data;
 using Bookfiy_WepApp.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SixLabors.ImageSharp;
+using System.Text.Encodings.Web;
+using WhatsAppCloudApi;
+using WhatsAppCloudApi.Services;
 using Image = SixLabors.ImageSharp.Image;
 
 namespace Bookfiy_WepApp.Controllers
@@ -19,16 +24,25 @@ namespace Bookfiy_WepApp.Controllers
         private readonly IDataProtector _dataProtector;
         private readonly IMapper _mapper;
         private readonly IimageService _imageService;
-        public SubscripersController(ApplicationDbContext context, IMapper mapper, IimageService imageService, IDataProtectionProvider dataProtector)
+        private readonly IWhatsAppClient _whatsAppClient;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IEmailBodyBuilder _emailBodyBuilder;
+        private readonly IEmailSender _emailSender;
+        public SubscripersController(ApplicationDbContext context, IMapper mapper, IimageService imageService, IDataProtectionProvider dataProtector, IWhatsAppClient whatsAppClient, IWebHostEnvironment webHostEnvironment, IEmailBodyBuilder emailBodyBuilder, IEmailSender emailSender)
         {
             _context = context;
             _mapper = mapper;
             _imageService = imageService;
             _dataProtector = dataProtector.CreateProtector("MySecureKy");
+            _whatsAppClient = whatsAppClient;
+            _webHostEnvironment = webHostEnvironment;
+            _emailBodyBuilder = emailBodyBuilder;
+            _emailSender = emailSender;
         }
 
         public IActionResult Index()
         {
+
             return View();
         }
 
@@ -110,7 +124,38 @@ namespace Bookfiy_WepApp.Controllers
             _context.Add(subscriber);
             _context.SaveChanges();
 
-            //TODO: Send welcome email
+            //Send welcome email
+            var placeholders = new Dictionary<string, string>()
+            {
+                { "imageUrl", "https://res.cloudinary.com/bookfiy/image/upload/v1672442893/icon-positive-vote-2_jcxdww_dps4xg.svg" },
+                { "header", $"Welcome {model.FirstName}" },
+                { "body", "thanks for joining Bookify 🤩" }
+            };
+
+            var body = _emailBodyBuilder.GetEmailBody(EmailTempletes.notificationTemp, placeholders);
+
+            await _emailSender.SendEmailAsync(
+                model.Email,
+                "Welcome to Bookify", body);
+
+
+            if (model.HasWhatsApp)
+            {
+                var component = new List<WhatsAppComponent>()
+            {
+                new WhatsAppComponent
+                {
+                    Type = "body",
+                    Parameters = new List<object>()
+                    {
+                        new WhatsAppTextParameter{Text = $"{model.FirstName}"}
+                    }
+                }
+                };
+                 var mobileNumber = _webHostEnvironment.IsDevelopment() ? "01151889942" : model.MobileNumber;
+                 await _whatsAppClient.SendMessage($"2{mobileNumber}", WhatsAppLanguageCode.English_US, WhatsAppTemplates.WelcomeMessage, component);
+            }
+
 
             var subscriberId = _dataProtector.Protect(subscriber.Id.ToString());
 
@@ -140,7 +185,7 @@ namespace Bookfiy_WepApp.Controllers
             if (!ModelState.IsValid)
                 return View("_Form",PopulateViewModel(model));
 
-            var subscriberId = int.Parse(_dataProtector.Unprotect(model.Key));
+            var subscriberId = int.Parse(_dataProtector.Unprotect(model.Key!));
 
             var subscriper = _context.Subscripers.Find(subscriberId);
 

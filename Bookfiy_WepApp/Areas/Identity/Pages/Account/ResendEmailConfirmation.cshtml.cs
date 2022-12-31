@@ -87,11 +87,18 @@ namespace Bookfiy_WepApp.Areas.Identity.Pages.Account
                 values: new { userId = userId, code = code },
                 protocol: Request.Scheme);
 
-            var body = _emailBodyBuilder.GetEmailBody("https://drive.google.com/file/d/15ZoYmz7zYv6_a80WdPqnHtbUy8xa7HwQ/view?usp=share_link",
-                $"Hey {user.FullName}, Thanks for Joining us!",
-                "Please Confirm Your Email",
-                $"{HtmlEncoder.Default.Encode(callbackUrl!)}",
-                "Activate Account");
+
+            var placeHolders = new Dictionary<string, string>()
+                {
+                    {"[imageUrl]","https://drive.google.com/file/d/15ZoYmz7zYv6_a80WdPqnHtbUy8xa7HwQ/view?usp=share_link"},
+                    {"[header]",$"Hey {user.FullName}, Thanks for Joining us!"},
+                    {"[body]","Please Confirm Your Email"},
+                    {"[url]",$"{HtmlEncoder.Default.Encode(callbackUrl!)}"},
+                    {"[linkTitle]","Activate Account"}
+                };
+
+
+            var body = _emailBodyBuilder.GetEmailBody( EmailTempletes.emailTemp,placeHolders);
 
             await _emailSender.SendEmailAsync(
                 user.Email,

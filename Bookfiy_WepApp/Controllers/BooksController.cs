@@ -34,8 +34,6 @@ namespace Bookfiy_WepApp.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly Cloudinary _cloudinary;
-        private List<string> _allowedExtensions = new() { ".jpg", ".jpeg", ".png" };
-        private int _maxAllowedSize = 2097152;
         private readonly IimageService _imageService;
         public BooksController(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment webHostEnvironment
             , IOptions<CloudinarySettings> cloudinary

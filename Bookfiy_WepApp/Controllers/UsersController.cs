@@ -13,6 +13,7 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text;
 using Bookfiy_WepApp.Services;
+using Bookfiy_WepApp.Core.Const;
 
 namespace Bookfiy_WepApp.Controllers
 {
@@ -81,16 +82,23 @@ namespace Bookfiy_WepApp.Controllers
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = Url.Page(
-                    "/Account/ConfirmEmail",
-                    pageHandler: null,
-                    values: new { area = "Identity", userId = user.Id, code = code },
-                    protocol: Request.Scheme);
+                     "/Account/ConfirmEmail",
+                     pageHandler: null,
+                     values: new { area = "Identity", userId = user.Id, code },
+                     protocol: Request.Scheme);
 
-                var body = _emailBodyBuilder.GetEmailBody("https://drive.google.com/file/d/15ZoYmz7zYv6_a80WdPqnHtbUy8xa7HwQ/view?usp=share_link",
-                    $"Hey {user.FullName}, Thanks for Joining us!", "Please Confirm Your Email",
-                    $"{HtmlEncoder.Default.Encode(callbackUrl!)}", "Activate Account");
+                var placeholders = new Dictionary<string, string>()
+                {
+                    { "imageUrl", "https://res.cloudinary.com/bookfiy/image/upload/v1672442893/icon-positive-vote-1_rdexez_bvulzr.svg" },
+                    { "header", $"Hey {user.FullName}, thanks for joining us!" },
+                    { "body", "please confirm your email" },
+                    { "url", $"{HtmlEncoder.Default.Encode(callbackUrl!)}" },
+                    { "linkTitle", "Active Account!" }
+                };
 
-                await _emailSender.SendEmailAsync(model.Email, "Confirm your email",body);
+                var body = _emailBodyBuilder.GetEmailBody(EmailTempletes.emailTemp, placeholders);
+
+                await _emailSender.SendEmailAsync(user.Email, "Confirm your email", body);
 
 
                 var viewModel = _mapper.Map<UsersViewModel>(user);

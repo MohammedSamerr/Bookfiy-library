@@ -5,23 +5,25 @@ namespace Bookfiy_WepApp.Services
     public class EmailBodyBuilder :IEmailBodyBuilder
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
+
         public EmailBodyBuilder(IWebHostEnvironment webHostEnvironment)
         {
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public string GetEmailBody(string imageUrl, string header, string body, string url, string link)
+        public string GetEmailBody(string template, Dictionary<string, string> placeholders)
         {
-            var filePath = $"{_webHostEnvironment.WebRootPath}/templates/email.html";
+            var filePath = $"{_webHostEnvironment.WebRootPath}/templates/{template}.html";
             StreamReader str = new(filePath);
-            var temp = str.ReadToEnd();
+
+            var templateContent = str.ReadToEnd();
             str.Close();
-            return temp.
-                Replace("[imageUrl]", imageUrl).
-                Replace("[header]", header).
-                Replace("[body]", body).
-                Replace("[url]", url).
-                Replace("[linkTitle]", link);
+
+            foreach (var placeholder in placeholders)
+                templateContent =
+                    templateContent.Replace($"[{placeholder.Key}]", placeholder.Value);
+
+            return templateContent;
         }
     }
 }
