@@ -40,11 +40,90 @@ namespace Bookfiy_WepApp.Controllers
             _emailSender = emailSender;
         }
 
+        
         public IActionResult Index()
         {
-
+            
             return View();
         }
+
+        #region renewal
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RenewSubscribtion(string sKey)
+        {
+            // Unprotect key
+            var subscriberId = int.Parse(_dataProtector.Unprotect(sKey));
+
+            var subscriber = await _context.Subscripers
+                .Include(s => s.Subscriptions).SingleOrDefaultAsync(s => s.Id == subscriberId);
+
+
+            if (subscriber is null)
+                return NotFound();
+
+            if (subscriber.IsBlackedListed)
+                return BadRequest();
+
+
+            var lastSubscribtion = subscriber.Subscriptions.Last();
+            var startDate = lastSubscribtion.EndDate < DateTime.Today
+                ? DateTime.Today 
+                : lastSubscribtion.EndDate.AddDays(1);
+
+            Subscription newSubscribtion = new ()
+            {
+                CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value,
+                CreatedOn = DateTime.Now,
+                StartDate = startDate,
+                EndDate = startDate.AddYears(1)
+            };
+            subscriber.Subscriptions.Add(newSubscribtion);
+
+            _context.SaveChanges();
+
+
+            //TODO :: Send Message and Email
+
+            //Send welcome email
+            var placeholders = new Dictionary<string, string>()
+            {
+                { "imageUrl", "https://res.cloudinary.com/bookfiy/image/upload/v1672442893/icon-positive-vote-2_jcxdww_dps4xg.svg" },
+                { "header", $"Welcome {subscriber.FirstName}" },
+                { "body", "Your Subscription Renewed Successfully" }
+            };
+
+            var body = _emailBodyBuilder.GetEmailBody(EmailTempletes.notificationTemp, placeholders);
+
+            await _emailSender.SendEmailAsync(
+                subscriber.Email,
+                "Welcome to Bookify", body);
+
+
+            if (subscriber.HasWhatsApp)
+            {
+                var component = new List<WhatsAppComponent>()
+            {
+                new WhatsAppComponent
+                {
+                    Type = "body",
+                    Parameters = new List<object>()
+                    {
+                        new WhatsAppTextParameter{Text = $"{subscriber.FirstName}"}
+                    }
+                }
+                };
+                var mobileNumber = _webHostEnvironment.IsDevelopment() ? "01151889942" : subscriber.MobileNumber;
+                await _whatsAppClient.SendMessage($"2{mobileNumber}", WhatsAppLanguageCode.English_US, WhatsAppTemplates.WelcomeMessage, component);
+            }
+
+            //////////////////////
+
+            var viewModel = _mapper.Map<SubscribtionViewModel>(newSubscribtion);
+
+            return PartialView("_SubscriptionRow", viewModel);
+        }
+        #endregion
 
         #region Search
 
@@ -78,12 +157,13 @@ namespace Bookfiy_WepApp.Controllers
             var subscriber = _context.Subscripers
                 .Include(s => s.Governorate)
                 .Include(s => s.Area)
+                .Include(s => s.Subscriptions)
                 .SingleOrDefault(s => s.Id == subscriberId);
 
             if (subscriber is null)
                 return NotFound();
 
-            var viewModel = _mapper.Map<SubscriperViewModel>(subscriber);
+            var viewModel = _mapper.Map<SubscriperViewModel>(subscriber);  
             viewModel.Key = id;
 
             return View(viewModel);
@@ -121,6 +201,15 @@ namespace Bookfiy_WepApp.Controllers
             subscriber.ImageThumbnailUrl = $"{imagePath}/thumb/{imageName}";
             subscriber.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
+            Subscription subscription = new ()
+            {
+                CreatedById = subscriber.CreatedById,
+                CreatedOn = subscriber.CreatedOn,
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today.AddYears(1)
+            };
+
+            subscriber.Subscriptions.Add(subscription);
             _context.Add(subscriber);
             _context.SaveChanges();
 

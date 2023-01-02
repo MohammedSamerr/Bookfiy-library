@@ -20,5 +20,7 @@ namespace Bookfiy_WepApp.Core.ViewModels
         public bool IsBlackedListed { get; set; }
         public DateTime CreatedOn { get; set; }
 
+        public IEnumerable<SubscribtionViewModel> Subscriptions { get; set; } = new List<SubscribtionViewModel>() ;
+
     }
 }

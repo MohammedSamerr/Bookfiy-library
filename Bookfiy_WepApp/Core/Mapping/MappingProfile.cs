@@ -64,6 +64,10 @@ namespace Bookfiy_WepApp.Core.Mapping
             CreateMap<Area, SelectListItem>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.Name));
+
+
+            //subscription
+            CreateMap<Subscription, SubscribtionViewModel>();
         }
     }
 }

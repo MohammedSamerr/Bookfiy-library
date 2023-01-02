@@ -4,6 +4,7 @@ using Bookfiy_WepApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bookfiy_WepApp.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221231042647_Edit-Subscribtion_tabel")]
+    partial class EditSubscribtion_tabel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -856,7 +858,7 @@ namespace Bookfiy_WepApp.Data.Migrations
                         .HasForeignKey("CreatedById");
 
                     b.HasOne("Bookfiy_WepApp.Core.Models.Subscriper", "Subscriber")
-                        .WithMany("Subscriptions")
+                        .WithMany("Subscription")
                         .HasForeignKey("SubscriberId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -936,7 +938,7 @@ namespace Bookfiy_WepApp.Data.Migrations
 
             modelBuilder.Entity("Bookfiy_WepApp.Core.Models.Subscriper", b =>
                 {
-                    b.Navigation("Subscriptions");
+                    b.Navigation("Subscription");
                 });
 #pragma warning restore 612, 618
         }

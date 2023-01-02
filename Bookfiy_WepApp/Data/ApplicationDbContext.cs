@@ -36,6 +36,7 @@ namespace Bookfiy_WepApp.Data
         public DbSet<Area> Areas { get; set; }
         public DbSet<Governorate> Governorates { get; set; }
         public DbSet<Subscriper> Subscripers { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
         
     }
 }
